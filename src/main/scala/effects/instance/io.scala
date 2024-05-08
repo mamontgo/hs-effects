@@ -1,6 +1,6 @@
 package effects.instance
 
-import effects.{Applicative, Empty, Functor, Monad, Monoid, Pure}
+import effects.{Applicative, Functor, Monad, Monoid, Pure}
 import effects.instance.FunctionInstances.*
 import effects.instance.IO.{IOApplicative, IOFunctor, IOMonad, IOMonoid}
 

@@ -1,5 +1,6 @@
 package effects
 
+import effects.instance.IO
 import org.scalatest.funsuite.AnyFunSuite
 
 import java.io.{File, FileWriter}
@@ -7,6 +8,18 @@ import scala.io.BufferedSource
 import scala.util.{Try, Using}
 
 class Sandbox  extends AnyFunSuite {
+
+  trait Empty[F[_]] {
+    def apply[A](): F[A]
+  }
+
+  def emptyOption: Empty[Option] = new Empty[Option]:
+    override def apply[A](): Option[A] = None
+
+  def emptyIO[F[_]]: Empty[IO] = new Empty[IO]:
+    override def apply[A] = ???
+//    override def apply[A <: Monoid[F, _]]()(implicit e:Empty[F]): IO[A] = IO.create(e().asInstanceOf[A])
+
 
   def appendWorld(x: String): String = {
     println(s"appending world to $x")

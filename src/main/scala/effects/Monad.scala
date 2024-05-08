@@ -22,16 +22,20 @@ object Monad {
 
   // M[M[A]] => M[A]
   def join[F[_], B](a: Monad[F, F[B]]): F[B] = a.flatMap(identity)
-
-//  def mapM[M[_], A, B](f:A => Monad[M, B])(l:Seq[A]): Monad[M, Seq[B]] = {
-//
-//    val foldFunction: (A, Monad[M, Seq[B]]) => M[Seq[B]] = (a: A, r: Monad[M, Seq[B]]) => {
-//       for {
-//        x <- f(a)
-//        xs <- r
-//      } yield Seq(x) ++ xs
-//    }
-//    val x = pure[M, Seq[B]](Seq())
-//  }
+  
+  def sequence[M[_] <: Monad[M, _], A](s: Seq[M[A]])(implicit p: Pure[M]):M[Seq[A]] = {
+    mapM(identity[M[A]])(s)(p)
+  }
+  
+  def mapM[M[_] <: Monad[M, _], A, B](f:A => M[B])(l:Seq[A])(implicit p: Pure[M]): M[Seq[B]] = {
+    val foldFunction: (M[Seq[B]], A) => M[Seq[B]] = (r: M[Seq[B]], a: A) => {
+       for {
+        x <- f(a)
+        xs <- r
+      } yield Seq(x.asInstanceOf[B]) ++ xs.asInstanceOf[Seq[B]]
+    }
+    val x: M[Seq[B]] = p(Seq())
+    l.foldLeft(x)(foldFunction)
+  }
 
 }

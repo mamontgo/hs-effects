@@ -22,5 +22,7 @@ case class FileRead(source: BufferedSource) extends Functor[Seq, Char] {
   def getLines: Seq[String] = {
     source.getLines().toSeq
   }
+
+  override def inst: Seq[Char] = source.toSeq
 }
 

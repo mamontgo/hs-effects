@@ -19,7 +19,7 @@ def main(): Unit = {
 def asSeq(s:String): Seq[Char] = s.toSeq
 
 def getNames(): Unit = {
-  val firstname = getConsoleLine("Enter firstname: ").map(s => asSeq(s))
+  val firstname = getConsoleLine("Enter firstname: ").map(asSeq)
   val surname = getConsoleLine("Enter surname: ").map(asSeq)
 //  firstname.combine(surname)
 

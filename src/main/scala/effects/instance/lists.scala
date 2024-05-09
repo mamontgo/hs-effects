@@ -1,14 +1,20 @@
 package effects.instance
 
-import effects.{Applicative, Empty, Foldable, Functor, Monad, Monoid, Pure}
+import effects.{Applicative, Empty, Foldable, Functor, Monad, Monoid, Pure, Return}
 
 import scala.language.implicitConversions
 
 
 private trait ListInstances {
 
+  implicit def returnSeq: Return[Seq] = new Return[Seq]:
+    override def apply[A](a: A): Seq[A] = Seq(a)
+    override def monad[A](a: A): Monad[Seq, A] = this(a).monad
+    override def toMonad[A](a: Seq[A]): Monad[Seq, A] = a.monad
+
   implicit def pureSeq: Pure[Seq] = new Pure[Seq]:
     override def apply[A](a: A): Seq[A] = Seq(a)
+    override def ap[A](a: A): Applicative[Seq, A] = Seq(a)
 
   implicit def asSeqMonad[A](s: Seq[A]):SeqMonad[A] = SeqMonad(s)
 
@@ -31,6 +37,8 @@ private trait ListInstances {
 
   trait SeqFunctor[A](s: Seq[A]) extends Functor[Seq, A] {
     override def map[B](f: A => B): Seq[B] = s.map(f)
+
+    override def inst: Seq[A] = s
   }
 
   trait SeqMonoid[A](s: Seq[A]) extends Monoid[Seq, A] {

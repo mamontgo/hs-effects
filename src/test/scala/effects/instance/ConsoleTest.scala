@@ -9,7 +9,4 @@ class ConsoleTest extends AnyFunSuite {
     println("hello world")
   }
 
-  test("Console Test") {
-    println("Here?")
-  }
 }

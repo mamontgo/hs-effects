@@ -1,6 +1,6 @@
 package effects.instance
 
-import effects.{Applicative, Foldable, Functor, Monad, Monoid, Pure}
+import effects.{Applicative, Foldable, Functor, Monad, Monoid, Pure, Return}
 
 import scala.collection.immutable.Iterable
 
@@ -9,8 +9,14 @@ trait IterableInstances {
   implicit class IterableTypeClasses[T](a: Iterable[T]) extends IterableMonad(a)
     with IterableMonoid(a) with IterableApplicative(a) with IterableFunctor(a) with IterableFoldable(a)
 
+  implicit def returnIterable: Return[Iterable] = new Return[Iterable]:
+    override def apply[A](a: A): Iterable[A] = Seq(a)
+    override def monad[A](a: A): Monad[Iterable, A] = this (a).monad
+    override def toMonad[A](a: Iterable[A]): Monad[Iterable, A] = a.monad
+
   implicit def pure: Pure[Iterable] = new Pure[Iterable]:
     override def apply[A](a: A): Iterable[A] = Seq(a)
+    override def ap[A](a: A): Applicative[Iterable, A] = Seq(a)
 
   trait IterableMonad[A](s: Iterable[A]) extends Monad[Iterable, A] {
     override def flatMap[B](f: A => Iterable[B]): Iterable[B] = s.flatMap(f)
@@ -29,6 +35,8 @@ trait IterableInstances {
 
   trait IterableFunctor[A](s: Iterable[A]) extends Functor[Iterable, A] {
     override def map[B](f: A => B): Iterable[B] = s.map(f)
+
+    override def inst: Iterable[A] = s
   }
 
   trait IterableMonoid[A](s: Iterable[A]) extends Monoid[Iterable, A] {

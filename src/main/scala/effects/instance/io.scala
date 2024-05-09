@@ -1,8 +1,8 @@
 package effects.instance
 
-import effects.{Applicative, Functor, Monad, Monoid, Pure}
 import effects.instance.FunctionInstances.*
 import effects.instance.IO.{IOApplicative, IOFunctor, IOMonad, IOMonoid}
+import effects.*
 
 class IO[T] private(payLoad: () => T) {
   private def getPayload: () => T = payLoad
@@ -11,8 +11,6 @@ class IO[T] private(payLoad: () => T) {
 
 object IO {
 
-  implicit def pureIO: Pure[IO] = new Pure[IO]:
-    override def apply[A](a: A): IO[A] = IO.create(a)
 
   def runEffect[T](in: IO[T]): T = in.getPayload()
 
@@ -45,13 +43,26 @@ object IO {
   trait IOFunctor[A](s: IO[A]) extends Functor[IO, A] {
     override def map[B](f: A => B): IO[B] = IO(s.getPayload.map(f))
 
+    override def inst: IO[A] = s
   }
 
 }
 
 trait IOInstances {
-  implicit class IOEffectTypeClass[A](a:IO[A]) extends IOMonad(a) with IOApplicative(a) with IOFunctor(a)
-  implicit class IOMonoidEffectTypeClass[B, F[_]](a:IO[Monoid[F, B]]) extends IOMonoid(a)
+  implicit class IOEffectTypeClass[A](a: IO[A]) extends IOMonad(a) with IOApplicative(a) with IOFunctor(a)
+
+  implicit class IOMonoidEffectTypeClass[B, F[_]](a: IO[Monoid[F, B]]) extends IOMonoid(a)
+
+  implicit def returnIO: Return[IO] = new Return[IO]:
+    override def apply[A](a: A): IO[A] = IO.create(a)
+    override def monad[A](a: A): Monad[IO, A] = this (a).monad
+    override def toMonad[A](a: IO[A]): Monad[IO, A] = a.monad
+
+
+  implicit def pureIO: Pure[IO] = new Pure[IO]:
+    override def apply[A](a: A): IO[A] = IO.create(a)
+
+    override def ap[A](a: A): Applicative[IO, A] = IO.create(a).applicative
 }
 
 object IOInstances extends IOInstances

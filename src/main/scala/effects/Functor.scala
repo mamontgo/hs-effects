@@ -9,20 +9,17 @@ trait Functor[F[_], A] {
 
   @targetName("extMap")
   def <\>[B](f: A => B): F[B] = map(f)
-  
+
   def functor: Functor[F, A] = this
-  
+
+  def inst: F[A]
+
 }
 
 object Functor {
 
   // (A => B) => F[A] => F[B]
   def liftF[A, B](f: A => B): FunctorMap[A, B] = FunctorMap(f)
-
-//  def liftFx[A, B, F[_]](f: A => B)(x: Functor[F, A]): F[B] = {
-//    x.map(f)
-//  }
-
 }
 
 case class FunctorMap[A,B](f:A => B) {

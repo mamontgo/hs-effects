@@ -6,9 +6,38 @@ import effects.instance.IO
 
 class MonadTest extends AnyFunSuite {
 
+  test("Option As Monad ") {
+    val x = Some(123).monad;
+    println(x)
+  }
+
   test("monad sequence") {
-    val x = Seq(IO.create("123"), IO.create("321"))
-    Monad.sequence(x)
+    val x:Seq[Option[String]] = Seq(Some("123"), Some("321"))
+    val res: Option[Seq[String]] = Monad.sequence(x.map(_.monad))
+
+    IO.runEffect(println(res))
+    assert(res.contains(List("123", "321")))
+  }
+
+  test("mapM options") {
+
+    def asOption(a: Int): Option[Int] =
+      a match
+        case 5 => Some(50)
+        case y => Some(y)
+
+//      if (a == 5)
+//        Some(50)
+//      else
+//        Some(a)
+
+
+    val nums: Seq[Int] = 1 to 10
+
+    val res = Monad.mapM(asOption.map(_.monad))(nums)
+
+    IO.runEffect(println(res))
+    assert(res == Some(List(1, 2, 3, 4, 50, 6, 7, 8, 9, 10)))
   }
 
 }

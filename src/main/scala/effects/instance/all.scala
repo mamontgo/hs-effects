@@ -5,3 +5,4 @@ object All
     with OptionInstances
     with IOInstances
     with Console
+    with BaseUtils

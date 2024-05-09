@@ -1,7 +1,15 @@
 package effects
 
-import effects.instance.All
 import scala.annotation.targetName
+
+trait Return[F[_]] {
+  def apply[A](a: A): F[A]
+
+  def monad[A](a: A): Monad[F, A]
+
+  def toMonad[A](a: F[A]): Monad[F, A]
+}
+
 
 // M[A] => (A => M[B]) => M[B]
 trait Monad[F[_], A] extends Applicative[F, A] {
@@ -22,20 +30,20 @@ object Monad {
 
   // M[M[A]] => M[A]
   def join[F[_], B](a: Monad[F, F[B]]): F[B] = a.flatMap(identity)
-  
-  def sequence[M[_] <: Monad[M, _], A](s: Seq[M[A]])(implicit p: Pure[M]):M[Seq[A]] = {
-    mapM(identity[M[A]])(s)(p)
+
+  def sequence[M[_], F <: Monad[M,A], A](s: Seq[F])(implicit p: Return[M]):M[Seq[A]] = {
+    mapM(identity[F])(s)(p)
   }
-  
-  def mapM[M[_] <: Monad[M, _], A, B](f:A => M[B])(l:Seq[A])(implicit p: Pure[M]): M[Seq[B]] = {
-    val foldFunction: (M[Seq[B]], A) => M[Seq[B]] = (r: M[Seq[B]], a: A) => {
-       for {
+
+  def mapM[M[_], A, B, F <: Monad[M, B]](f:A => F)(l:Seq[A])(implicit p: Return[M]): M[Seq[B]] = {
+    val foldFunction: (Monad[M, Seq[B]], A) => Monad[M, Seq[B]] = (r: Monad[M, Seq[B]], a: A) => {
+       val y = for {
         x <- f(a)
         xs <- r
-      } yield Seq(x.asInstanceOf[B]) ++ xs.asInstanceOf[Seq[B]]
+      } yield xs ++ Seq(x)
+        p.toMonad(y)
     }
-    val x: M[Seq[B]] = p(Seq())
-    l.foldLeft(x)(foldFunction)
+    l.foldLeft(p.monad(Seq()))(foldFunction).inst
   }
 
 }

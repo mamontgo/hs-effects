@@ -19,4 +19,15 @@ object FunctionSyntax extends FunctionSyntax {
   def flip[A, B, C](f: (A, B) => C): (B, A) => C = (b: B, a: A) => f(a, b)
 
   def const[A, B](a: A)(b: B): A = a
+
+  def curry[A, B, C](f:(A, B) => C): A => B => C = (a:A) => (b:B) => f(a, b)
+
+  def uncurry[A, B, C](f: A => B => C): (A, B) => C = (a: A, b: B) => f(a)(b)
+
+  def id[A](a:A):A = a
+
+  def fst[A,B]: (A, B) => A = (a:A, b:B) => a
+
+  def snd[A,B]: (A, B) => B = (a:A, b:B) => b
+
 }

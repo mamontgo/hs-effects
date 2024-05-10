@@ -1,8 +1,10 @@
 package effects.instance
 
-import effects.Functor.*
+import effects.All.*
+import effects.{Functor}
 import org.scalatest.funsuite.AnyFunSuite
-import effects.instance.OptionInstances.*
+
+import scala.language.implicitConversions
 
 class OptionTest extends AnyFunSuite {
 
@@ -15,7 +17,7 @@ class OptionTest extends AnyFunSuite {
   test("lift function map for option") {
     val x = Some(300)
     val inc = (_:Int)+1
-    val incF = liftF(inc)
+    val incF = Functor.liftF(inc)
 
     assert(incF(x).contains(301))
   }
@@ -28,6 +30,15 @@ class OptionTest extends AnyFunSuite {
 
 
     assert(res.contains(101))
+  }
+
+  test("monoid option test") {
+
+    val f:Option[Seq[Int]] = Some(Seq(1,2))
+    val s = Some(Seq(3,4))
+
+    IO.runEffect(println(f.map(_.monoid).combine(s)))
+    assert(f.map(_.monoid).combine(s) == Option(Seq(1,2,3,4)))
   }
 
 }

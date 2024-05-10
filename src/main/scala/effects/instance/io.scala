@@ -25,6 +25,12 @@ object IO {
     override def combine(y: IO[F[B]]): IO[F[B]] = IO.create(s.getPayload().combine(y.getPayload()))
 
     override def empty: IO[F[B]] = IO.create(s.getPayload().empty)
+
+    override def inst: IO[F[B]] = {
+      import IOInstances._
+      s.map(_.inst)
+    }
+
   }
 
 

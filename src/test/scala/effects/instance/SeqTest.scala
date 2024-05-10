@@ -1,8 +1,8 @@
 package effects.instance
 
-import effects.Functor.*
-import effects.FunctorMap
-import effects.instance.IterableInstances.*
+import effects.All.*
+import effects.Functor._
+import effects.{Functor, FunctorMap}
 import org.scalatest.funsuite.AnyFunSuite
 
 class SeqTest extends AnyFunSuite {
@@ -12,8 +12,6 @@ class SeqTest extends AnyFunSuite {
   test("map as Seq functor using map and infix") {
     val s = Seq(1, 2, 3, 4)
 
-    IterableTypeClasses(s)
-    
     assert(s.map(addOne) == Seq(2, 3, 4, 5))
     assert(s <\> addOne == Seq(2, 3, 4, 5))
   }
@@ -40,6 +38,7 @@ class SeqTest extends AnyFunSuite {
   test("ap as applicative") {
     val s = Seq(1, 2, 3, 4)
     val fs: Seq[Int => Int] = Seq(_ + 1, _ * 3)
+
     val expected = Seq(2, 3, 4, 5, 3, 6, 9, 12)
     assert(s <*> fs == expected)
     assert(s.ap(fs) == expected)

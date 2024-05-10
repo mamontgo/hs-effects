@@ -1,6 +1,6 @@
 package effects.instance
 
-import effects.{Applicative, Empty, Foldable, Functor, Monad, Monoid, Pure, Return}
+import effects.{Applicative, Foldable, Functor, Monad, Monoid, Pure, Return}
 
 import scala.language.implicitConversions
 
@@ -16,13 +16,14 @@ private trait ListInstances {
     override def apply[A](a: A): Seq[A] = Seq(a)
     override def ap[A](a: A): Applicative[Seq, A] = Seq(a)
 
-  implicit def asSeqMonad[A](s: Seq[A]):SeqMonad[A] = SeqMonad(s)
+  implicit class SeqInstanceImpl[A](s: Seq[A]) extends SeqApplicative(s) with SeqMonad(s) with SeqFunctor(s) with SeqMonoid(s) with SeqFoldable(s)
 
-  class SeqMonad[A](s: Seq[A]) extends SeqApplicative(s) with SeqMonoid(s) with Monad[Seq, A]  {
+
+  trait SeqMonad[A](s: Seq[A]) extends  Monad[Seq, A]  {
     override def flatMap[B](f: A => Seq[B]): Seq[B] = s.flatMap(f)
   }
 
-  class SeqApplicative[A](s: Seq[A]) extends SeqFunctor(s) with SeqFoldable(s) with Applicative[Seq, A] {
+  trait SeqApplicative[A](s: Seq[A]) extends Applicative[Seq, A] {
 
     override def ap[B](a: Seq[A => B]): Seq[B] = a.flatMap(f => s.map(v => f(v)))
   }

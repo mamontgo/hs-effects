@@ -4,16 +4,14 @@ import scala.annotation.targetName
 
 
 // F[A] => (A => B) => F[B]
-trait Functor[F[_], A] {
+trait Functor[F[_], A] extends Effect[F, A] {
   def map[B](f: A => B): F[B]
 
   @targetName("extMap")
   def <\>[B](f: A => B): F[B] = map(f)
 
   def functor: Functor[F, A] = this
-
-  def inst: F[A]
-
+  
 }
 
 object Functor {

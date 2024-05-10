@@ -10,9 +10,6 @@ case class Thing[A](inner: A)
 
 object Thing {
 
-  implicit class ThingMonad[A](s: Thing[A]) extends ThingApplicative(s) with Monad[Thing, A] {
-    override def flatMap[B](f: A => Thing[B]): Thing[B] = f(s.inner)
-  }
 
   implicit def returnThing: Return[Thing] = new Return[Thing]:
     override def apply[A](a: A): Thing[A] = Thing(a)
@@ -23,8 +20,14 @@ object Thing {
     override def apply[A](a: A): Thing[A] = Thing(a)
     override def ap[A](a:A): Applicative[Thing, A] = Thing(a)
 
-  class ThingApplicative[A](s: Thing[A]) extends ThingFunctor(s) with Applicative[Thing, A] {
+  implicit class ThingInstance[A](s:Thing[A]) extends ThingFunctor(s) with ThingMonad(s) with ThingApplicative(s)
+  
+  trait ThingApplicative[A](s: Thing[A]) extends Applicative[Thing, A] {
     override def ap[B](a: Thing[A => B]): Thing[B] = Thing(a.inner(s.inner))
+  }
+
+  trait ThingMonad[A](s: Thing[A]) extends Monad[Thing, A] {
+    override def flatMap[B](f: A => Thing[B]): Thing[B] = f(s.inner)
   }
 
   trait ThingFunctor[A](s: Thing[A]) extends Functor[Thing, A] {

@@ -1,13 +1,30 @@
 package effects
 
+import effects.instance.All._
 import effects.instance.IO
 import org.scalatest.funsuite.AnyFunSuite
-
-import java.io.{File, FileWriter}
 import scala.io.BufferedSource
 import scala.util.{Try, Using}
 
 class Sandbox  extends AnyFunSuite {
+
+
+  def foldEither(e: Either[String, Int]): Int = {
+    e.fold[Int](_=>0 , identity)
+  }
+
+  def mapEither(e:Either[String, Int]): Either[String, Int] = {
+    e.map(_+1)
+  }
+
+  test("fold either") {
+    IO.runEffect {
+      println(foldEither(Left("Error")))
+    }
+
+    def fst[A, B](a:A, b:B):A = a
+    def snd[A, B](a:A, b:B):B = b
+  }
 
   trait Empty[F[_]] {
     def apply[A](): F[A]

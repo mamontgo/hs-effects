@@ -12,7 +12,7 @@ trait Return[F[_]] {
 
 
 // M[A] => (A => M[B]) => M[B]
-trait Monad[F[_], A] extends Applicative[F, A] {
+trait Monad[F[_], A] extends Functor[F, A] {
   def flatMap[B](f: A => F[B]): F[B]
 
   @targetName("extFlatMap")

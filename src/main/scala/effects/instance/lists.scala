@@ -18,7 +18,6 @@ private trait ListInstances {
 
   implicit class SeqInstanceImpl[A](s: Seq[A]) extends SeqApplicative(s) with SeqMonad(s) with SeqFunctor(s) with SeqMonoid(s) with SeqFoldable(s)
 
-
   trait SeqMonad[A](s: Seq[A]) extends  Monad[Seq, A]  {
     override def flatMap[B](f: A => Seq[B]): Seq[B] = s.flatMap(f)
   }

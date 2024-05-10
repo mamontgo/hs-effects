@@ -35,15 +35,15 @@ object Monad {
     mapM(identity[F])(s)(p)
   }
 
-  def mapM[M[_], A, B, F <: Monad[M, B]](f:A => F)(l:Seq[A])(implicit p: Return[M]): M[Seq[B]] = {
-    val foldFunction: (Monad[M, Seq[B]], A) => Monad[M, Seq[B]] = (r: Monad[M, Seq[B]], a: A) => {
+  def mapM[M[_], A, B](f:A => Monad[M, B])(l:Seq[A])(implicit p: Return[M]): M[Seq[B]] = {
+    val foldFunction: (A, Monad[M, Seq[B]]) => Monad[M, Seq[B]] = (a:A, r: Monad[M, Seq[B]]) => {
        val y = for {
         x <- f(a)
         xs <- r
-      } yield xs ++ Seq(x)
+      } yield Seq(x) ++ xs
         p.toMonad(y)
     }
-    l.foldLeft(p.monad(Seq()))(foldFunction).inst
+    l.foldRight(p.monad(Seq()))(foldFunction).inst
   }
 
 }

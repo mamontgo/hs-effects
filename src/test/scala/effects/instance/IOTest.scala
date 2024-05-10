@@ -1,37 +1,31 @@
 package effects.instance
 
-import effects.instance.All._
+import effects.Monad
+import effects.instance.All.*
 import org.scalatest.funsuite.AnyFunSuite
 
 class IOTest extends AnyFunSuite {
 
 
-  trait Hello
+  test("IO combine") {
 
-  class HelloOne(n: String) extends Hello
+    val x:IO[Seq[Int]] = IO.create(Seq(1,2,3))
+    val y:IO[Seq[Int]] = IO.create(Seq(4,5,6))
+    val m:IO[Seq[Int]] = x.map(_.monoid).combine(y)
 
-  class HelloTwo extends HelloOne("helloTwo")
+    val res:Seq[Int] = IO.runEffect(m)
+    assert(res == Seq(1, 2, 3, 4, 5, 6))
 
-  def test(xy: => Hello): String = {
-    xy.toString
+
   }
 
-  test("IO combine") {
-//    val f = scala.io.Source.fromFile("file.txt")
-    val x = IO.create(Seq(1,2,3))
-    val y = IO.create(Seq(4,5,6))
-    val m = x.map(_.monoid).combine(y)
+  test("sequence IO ") {
+    val s = 1 to 10
+    val r:Seq[IO[Unit]] = s.map(v => println(s"This is $v"))
+    IO.runEffect(println(r))
 
-    println(test(new Hello {}))
-    println(test(HelloOne("a")))
-    println(test(HelloTwo()))
-
-
-    m >>= (l => {
-      assert(l == Seq(1,2,3,4,5,6))
-      IO.create(l)
-    })
-
+    val y:IO[Seq[Unit]] = Monad.sequence(r.map(_.monad))
+    IO.runEffect(y)
 
 
   }

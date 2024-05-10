@@ -7,7 +7,8 @@ import effects.instance.IO
 @main
 def main(): Unit = {
 
-  val example:IO[Unit] = println("hello world".replace("hello", "other"))
+  val example:IO[Unit] = println("hello world")
+  IO.runEffect(example)
 
   val in:IO[String] = getConsoleLine("Enter your name: ")
   val res:IO[Unit] = in
@@ -16,19 +17,21 @@ def main(): Unit = {
   IO.runEffect(res)
 }
 
-def asSeq(s:String): Seq[Char] = s.toSeq
-
-def getNames(): Unit = {
-  val firstname = getConsoleLine("Enter firstname: ").map(asSeq)
-  val surname = getConsoleLine("Enter surname: ").map(asSeq)
-//  firstname.combine(surname)
 
 
-}
+
 
 def getConsoleLine(s: String): IO[String] = {
 
   println(s) >> readline()
+
+//  println(s).flatMap(_ => readline())
+//  println(s) >>= (_ => readline())
+
+
+  //  println(s)
+//  readline()
+
 
 //  for {
 //    _ <- println(s)
@@ -43,10 +46,16 @@ def funtorFunction(): Unit = {
   println(addThree(3))
 }
 
+
+def getNames(): Unit = {
+  val firstname = getConsoleLine("Enter firstname: ").map(_.toSeq)
+  val surname = getConsoleLine("Enter surname: ").map(_.toSeq)
+
+}
+
+
 def printFmap(): Unit = {
   val s:Seq[Int] = Seq(1, 2, 3)
-
-
 }
 
 def optionTesting(): Unit = {

@@ -1,11 +1,13 @@
 package effects.instance
 
-import effects.{Applicative, Foldable, Functor, Monad, Monoid, Pure, Return}
+import effects.{Applicative, Empty, Foldable, Functor, Monad, Monoid, Pure, Return}
 
 import scala.language.implicitConversions
 
 
 private trait ListInstances {
+
+  implicit def emptySeq[A]: Empty[Seq, A] = () => Seq()
 
   implicit def returnSeq: Return[Seq] = new Return[Seq]:
     override def apply[A](a: A): Seq[A] = Seq(a)
@@ -44,7 +46,6 @@ private trait ListInstances {
   trait SeqMonoid[A](s: Seq[A]) extends Monoid[Seq, A] {
     override def combine(y: Seq[A]): Seq[A] = s ++ y
 
-    override def empty: Seq[A] = Seq()
   }
 }
 

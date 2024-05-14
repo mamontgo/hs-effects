@@ -34,7 +34,7 @@ class OptionTest extends AnyFunSuite {
 
   test("monoid option test") {
 
-    val f:Option[Seq[Int]] = Some(Seq(1,2))
+    val f= Some(Seq(1,2))
     val s = Some(Seq(3,4))
 
     IO.runEffect(println(f.map(_.monoid).combine(s)))

@@ -12,8 +12,8 @@ class FunctorTest extends AnyFunSuite {
     val addOne:Int => Int = _+1
     val addOneF = Functor.liftF(addOne)
 
-    IO.runEffect (println <> addOneF (Some(43)))
-    IO.runEffect (println <> addOneF (Seq(43, 44)))
+    IO.runEffect (println <-> addOneF (Some(43)))
+    IO.runEffect (println <-> addOneF (Seq(43, 44)))
 
     assert(addOneF(Some(43)).contains(44))
     assert(addOneF (Seq(43, 44)) == Seq(44, 45))

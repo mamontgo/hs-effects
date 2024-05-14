@@ -11,6 +11,7 @@ class IO[T] private(payLoad: () => T) {
 
 object IO {
 
+  implicit def emptyIO[F[_], A](implicit empty: Empty[F, A]): Empty[IO, F[A]] = () => IO.create(empty())
 
   def runEffect[T](in: IO[T]): T = in.getPayload()
 
@@ -23,8 +24,6 @@ object IO {
   trait IOMonoid[B, F[_]](s: IO[Monoid[F, B]]) extends Monoid[IO, F[B]] {
 
     override def combine(y: IO[F[B]]): IO[F[B]] = IO.create(s.getPayload().combine(y.getPayload()))
-
-    override def empty: IO[F[B]] = IO.create(s.getPayload().empty)
 
     override def inst: IO[F[B]] = {
       import IOInstances._

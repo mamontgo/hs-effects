@@ -7,12 +7,12 @@ class FunctionApplicationTest extends AnyFunSuite {
 
   test("apply function") {
     val addOne: Int => Int = _ + 1
-    val x = addOne <> 2 + 22
+    val x = addOne <-> 2 + 22
     assert(x == 25)
     val y = addOne withParam 34 + 22
     assert(y == 57)
-    addOne <> addOne(1)
-    addOne <> (addOne <> addOne(1))
+    addOne <-> addOne(1)
+    addOne <-> (addOne <-> addOne(1))
   }
 
   test("flip function") {

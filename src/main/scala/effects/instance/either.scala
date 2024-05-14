@@ -1,12 +1,14 @@
 package effects.instance
 
 import effects.syntax.FunctionSyntax
-import effects.{Applicative, Foldable, Functor, Monad, Pure, Return}
+import effects.{Applicative, Empty, Foldable, Functor, Monad, Monoid, Pure, Return}
 
 
 trait EitherInstances {
 
-  implicit def pureReturn: Return[[F] =>> Either[?, F]] = new Return[[F] =>> Either[?, F]]:
+  implicit def emptyEither[F[_], B](implicit empty: Empty[F, B]): Empty[[E] =>> Either[?, E], F[B]] = () => Right(empty())
+
+  implicit def eitherReturn[B]: Return[[F] =>> Either[?, F]] = new Return[[F] =>> Either[?, F]]:
     override def apply[A](a: A): Either[?, A] = Right(a)
     override def monad[A](a: A): Monad[[F] =>> Either[?, F], A] = Right(a)
     override def toMonad[A](a: Either[?, A]): Monad[[F] =>> Either[?, F], A] = a.monad
@@ -17,6 +19,19 @@ trait EitherInstances {
     override def ap[A](a: A): Applicative[[F] =>> Either[?, F], A] = Right(a)
 
   implicit class EitherInstanceImpl[A, B](s: Either[A, B]) extends EitherApplicative(s) with EitherMonad(s) with EitherFunctor(s)
+  implicit class EitherMonoidEffectTypeClass[A, E[_], B](s: Either[A, Monoid[E, B]]) extends EitherMonoid(s)
+
+  trait EitherMonoid[A, E[_], B] (s: Either[A, Monoid[E, B]]) extends Monoid[[F] =>> Either[A, F], E[B]] {
+
+    override def inst: Either[A, E[B]] = s.map(_.inst)
+
+    override def combine(y: Either[A, E[B]]): Either[A, E[B]] = {
+      for {
+        f <- s
+        n <- y
+      } yield f.combine(n)
+    }
+  }
 
   trait EitherMonad[A, B](s: Either[A, B]) extends Monad[[F] =>> Either[A, F], B] {
     override def flatMap[C](f: B => Either[A, C]): Either[A, C] = s.flatMap(f)

@@ -3,9 +3,6 @@ package effects.instance
 import effects.syntax.FunctionSyntax.*
 import effects.{Applicative, Functor, Monad, Pure, Return}
 
-import scala.collection.immutable.Iterable
-
-
 private trait FunctionInstances {
 
 
@@ -26,7 +23,7 @@ private trait FunctionInstances {
     override def apply[A](a: A): () => A = () => a
     override def monad[A](a: A): Monad[[F] =>> () => F, A] = this (a).monad
     override def toMonad[A](a: () => A): Monad[[F] =>> () => F, A] = a.monad
-  
+
   implicit def purePartialFunction: Pure[[F] =>> () => F] = new Pure[[F] =>> () => F]:
     override def apply[A](a: A): () => A = () => a
     override def ap[A](a: A): Applicative[[F] =>> () => F, A] = () => a

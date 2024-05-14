@@ -1,8 +1,9 @@
 package effects
 
-import effects.instance.All._
+import effects.instance.All.*
 import effects.instance.IO
 import org.scalatest.funsuite.AnyFunSuite
+
 import scala.io.BufferedSource
 import scala.util.{Try, Using}
 
@@ -18,6 +19,11 @@ class Sandbox  extends AnyFunSuite {
   }
 
   test("fold either") {
+    
+    val x = Try {
+      "hello"
+    }
+    
     IO.runEffect {
       println(foldEither(Left("Error")))
     }
@@ -26,16 +32,6 @@ class Sandbox  extends AnyFunSuite {
     def snd[A, B](a:A, b:B):B = b
   }
 
-  trait Empty[F[_]] {
-    def apply[A](): F[A]
-  }
-
-  def emptyOption: Empty[Option] = new Empty[Option]:
-    override def apply[A](): Option[A] = None
-
-  def emptyIO[F[_]]: Empty[IO] = new Empty[IO]:
-    override def apply[A] = ???
-//    override def apply[A <: Monoid[F, _]]()(implicit e:Empty[F]): IO[A] = IO.create(e().asInstanceOf[A])
 
 
   def appendWorld(x: String): String = {
@@ -53,32 +49,22 @@ class Sandbox  extends AnyFunSuite {
 
 
 
-  trait CircleCirc:
-    def circumference: Double
+  test("inheritance for functions") {
 
-  case class Circle(x: Double, y: Double, radius: Double)
-
-  extension (c: Circle)
-    def circumference: Double = c.radius * math.Pi * 2
-
-  object CircleHelpers:
-    def circumference(c: Circle): Double = c.radius * math.Pi * 2
-
-  test("implicit trait>") {
-    val x = Circle(4,4,4)
-//    val v: Circ = x
-//val fileWriter = new FileWriter(new File("./src/test/resources/hello.txt"))
-//    fileWriter.write("hello there")
-//    fileWriter.close()
-
-
-    val in: Try[BufferedSource] = Using(scala.io.Source.fromFile("src/test/resources/test.txt")) {
-      result => result
+    def getEmpty[F[_], A](implicit empty: Empty[F, A]): F[A] = {
+      empty()
     }
 
-    //    val data = .getLines().toSeq
-    println(x.circumference)
+    val res:IO[Seq[Int]] = getEmpty[IO, Seq[Int]]
+    val m = res.map(s => s ++ Seq(1,2))
+    val e = IO.runEffect{
+      m
+    }
+
+    println(e)
+
   }
+
 
   test("thing?") {
     class Thing[A](thunk: => A) {
@@ -90,7 +76,7 @@ class Sandbox  extends AnyFunSuite {
       }
     }
 
-
+    val tuple = (123, "HELLO")
 
 
     val x =  Thing { "Hello" }

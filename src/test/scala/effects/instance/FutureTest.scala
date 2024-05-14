@@ -1,11 +1,10 @@
 package effects.instance
 
 import org.scalatest.funsuite.AnyFunSuite
-
-import scala.concurrent.{Await, Future}
 import effects.All.*
 
 import scala.concurrent.duration.Duration
+import scala.concurrent.{Await, Future}
 
 class FutureTest extends AnyFunSuite {
 
@@ -13,18 +12,24 @@ class FutureTest extends AnyFunSuite {
     implicit val ec: scala.concurrent.ExecutionContext = scala.concurrent.ExecutionContext.global
 
     val f1 = Future {
-      Thread.sleep(1000)
-      "hello one"
+      for {
+        _ <- ThreadIO.sleep(1000)
+      } yield "First 1000"
     }
 
     val f2 = Future {
-      Thread.sleep(1000)
-      "hello two"
+      for {
+        _ <- ThreadIO.sleep(1000)
+      } yield "Second 1000"
     }
 
-//    val x = Await.ready (
-      val x = f1.zipWith(f2)((a, b) => a ++ b)
-//    )
+    Await.ready (
+       f1.zipWith(f2)((a, b) =>  b <*> (a <\> (x => x.concat(_)))), atMost =  Duration.Inf
+    ).onComplete (v => {
+      val effect = v.get >>= (res => println(res))
+      IO.runEffect(effect)
+    })
+
 
   }
 }

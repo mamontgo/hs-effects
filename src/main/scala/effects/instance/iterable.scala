@@ -1,10 +1,12 @@
 package effects.instance
 
-import effects.{Applicative, Foldable, Functor, Monad, Monoid, Pure, Return}
+import effects.{Applicative, Empty, Foldable, Functor, Monad, Monoid, Pure, Return}
 
 import scala.collection.immutable.Iterable
 
 trait IterableInstances {
+
+  implicit def emptyIterable[A]: Empty[Iterable, A] = () => Seq()
 
   implicit class IterableTypeClasses[T](a: Iterable[T]) extends IterableMonad(a)
     with IterableMonoid(a) with IterableApplicative(a) with IterableFunctor(a) with IterableFoldable(a)
@@ -40,7 +42,6 @@ trait IterableInstances {
   }
 
   trait IterableMonoid[A](s: Iterable[A]) extends Monoid[Iterable, A] {
-    override def empty: Iterable[A] = Iterable()
 
     override def combine(y: Iterable[A]): Iterable[A] = s ++ y
   }

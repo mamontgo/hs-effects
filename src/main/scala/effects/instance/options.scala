@@ -5,6 +5,8 @@ import effects.*
 
 private trait OptionInstances {
 
+  implicit def emptyOption[A]: Empty[Option, A] = () => None
+
   implicit def returnOption: Return[Option] = new Return[Option]:
     override def apply[A](a: A): Option[A] = Some(a)
 
@@ -27,7 +29,7 @@ private trait OptionInstances {
 
   trait OptionApplicative[A](s: Option[A]) extends Applicative[Option, A] {
 
-    override def ap[B](a: Option[A => B]): Option[B] = a.flatMap(f => s.map(v => f(v)))
+    override def ap[B](a: Option[A => B]): Option[B] = a.flatMap(s.map)
   }
 
   trait OptionFunctor[A](s: Option[A]) extends Functor[Option, A] {
@@ -45,8 +47,6 @@ private trait OptionInstances {
         inY <- y
       } yield inS.combine(inY)
     }
-
-    override def empty: Option[O[B]] = None
 
     override def inst: Option[O[B]] = s.map(_.inst)
   }

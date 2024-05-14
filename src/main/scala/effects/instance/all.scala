@@ -8,6 +8,7 @@ trait All  extends ListInstances
   with Console
   with BaseUtils
   with EitherInstances
+  with ThreadIO
 
 
 object All

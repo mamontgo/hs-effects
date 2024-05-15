@@ -31,6 +31,8 @@ object Monad {
   // M[M[A]] => M[A]
   def join[F[_], B](a: Monad[F, F[B]]): F[B] = a.flatMap(identity)
 
+  
+  // F[M[A]] => M[F[A]]
   def sequence[M[_], F <: Monad[M,A], A](s: Seq[F])(implicit p: Return[M]):M[Seq[A]] = {
     mapM(identity[F])(s)(p)
   }

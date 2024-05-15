@@ -1,6 +1,6 @@
 package effects.instance
 
-import effects.instance.FunctionInstances.*
+import effects.All._
 import org.scalatest.funsuite.AnyFunSuite
 
 class FunctionTest extends AnyFunSuite {
@@ -30,8 +30,28 @@ class FunctionTest extends AnyFunSuite {
 
   test("functor consumer") {
     val x = () => 1
-    val y =  (_:Int) + 1
+    val y = (_: Int) + 1
     val res = x.map(y)()
     assert(res == 2)
+  }
+
+  test("zipWith function") {
+    val subtract = curry(flip((_: Int) - (_: Int)))
+    val sTwo: Int => Int = subtract(2)
+    val sTen = subtract(10)
+    val f = sTwo.zipWith(sTen)(curry((_: Int) + (_: Int)))
+
+//    IO.runEffect(println(f(20)))
+    assert(f(20) == 28)
+
+  }
+
+  test("zipWith producer function") {
+    val two = () => 2
+    val three = () => 3
+    val f = two.zipWith(three)(curry((_: Int) + (_: Int)))
+    assert(f() == 5)
+
+
   }
 }

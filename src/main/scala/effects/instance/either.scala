@@ -1,7 +1,7 @@
 package effects.instance
 
 import effects.syntax.FunctionSyntax
-import effects.{Applicative, Empty, Foldable, Functor, Monad, Monoid, Pure, Return}
+import effects.{Applicative, Empty, Foldable, Functor, Monad, Monoid, Pure, Return, Zip}
 
 
 trait EitherInstances {
@@ -18,7 +18,7 @@ trait EitherInstances {
     override def apply[A](a: A): Either[?, A] = Right(a)
     override def ap[A](a: A): Applicative[[F] =>> Either[?, F], A] = Right(a)
 
-  implicit class EitherInstanceImpl[A, B](s: Either[A, B]) extends EitherApplicative(s) with EitherMonad(s) with EitherFunctor(s)
+  implicit class EitherInstanceImpl[A, B](s: Either[A, B]) extends EitherApplicative(s) with EitherMonad(s) with EitherFunctor(s) with EitherZip(s)
   implicit class EitherMonoidEffectTypeClass[A, E[_], B](s: Either[A, Monoid[E, B]]) extends EitherMonoid(s)
 
   trait EitherMonoid[A, E[_], B] (s: Either[A, Monoid[E, B]]) extends Monoid[[F] =>> Either[A, F], E[B]] {
@@ -48,6 +48,12 @@ trait EitherInstances {
     override def map[C](f: B => C): Either[A, C] = s.map(f)
   }
 
+  trait EitherZip[A, B](s: Either[A, B]) extends Zip[[F] =>> Either[A, F], B] {
+    override def zipWith[D, E](o: Either[A, D])(zip: B => D => E): Either[A, E] = for {
+      si <- s
+      oi <- o
+    } yield zip(si)(oi)
+  }
 
   trait EitherFoldable[A, B](s: Either[A, B]) extends Foldable[[F] =>> Either[A, F], B] {
 

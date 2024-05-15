@@ -12,7 +12,7 @@ trait Pure[F[_]] {
 trait Applicative[F[_], A] extends Monad[F, A] {
 
 
-  def pure[B](a:B)(implicit p:Pure[F]): F[B] = p(a) 
+  def pure[B](a:B)(implicit p:Pure[F]): F[B] = p(a)
 
   def ap[B](a: F[A => B]): F[B]
 

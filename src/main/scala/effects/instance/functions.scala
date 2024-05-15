@@ -1,13 +1,13 @@
 package effects.instance
 
 import effects.syntax.FunctionSyntax.*
-import effects.{Applicative, Functor, Monad, Pure, Return}
+import effects.{Applicative, Functor, Monad, Pure, Return, Zip}
 
 private trait FunctionInstances {
 
 
-  implicit class FunctionInstanceImpl[A, B](s: A => B) extends FunctionFunctor(s) with FunctionApplicative(s) with FunctionMonad(s)
-  implicit class ProducerInstanceImpl[A](s: () => A) extends ProducerFunctor(s) with ProducerApplicative(s) with ProducerMonad(s)
+  implicit class FunctionInstanceImpl[A, B](s: A => B) extends FunctionFunctor(s) with FunctionApplicative(s) with FunctionMonad(s) with FunctionZip(s)
+  implicit class ProducerInstanceImpl[A](s: () => A) extends ProducerFunctor(s) with ProducerApplicative(s) with ProducerMonad(s) with ProducerZip(s)
 
 
   implicit def returnFunction: Return[[F] =>> ? => F] = new Return[[F] =>> ? => F]:
@@ -39,7 +39,11 @@ private trait FunctionInstances {
 
   }
 
-   trait FunctionFunctor[A, B](s: A => B) extends Functor[[F] =>> A => F, B] {
+  trait FunctionZip[A, B](s: A => B) extends Zip[[F] =>> A => F, B] {
+    override def zipWith[C, D](o: A => C)(zip: B => C => D): A => D = (a:A) => zip(s(a))(o(a))
+  }
+
+  trait FunctionFunctor[A, B](s: A => B) extends Functor[[F] =>> A => F, B] {
 
     override def map[C](f: B => C): A => C = (a: A) => f(s(a))
 
@@ -53,6 +57,10 @@ private trait FunctionInstances {
 
   trait ProducerApplicative[B](s: () => B) extends Applicative[[F] =>> () => F, B] {
     override def ap[C](app: () => (B => C)): () => C = () => app()(s())
+  }
+
+  trait ProducerZip[B](s: () => B) extends Zip[[F] =>> () => F, B] {
+    override def zipWith[C, D](o:() => C)(zip: B => C => D): () => D = () => zip(s())(o())
   }
 
   trait ProducerFunctor[B](s: () => B) extends Functor[[F] =>> () => F, B] {

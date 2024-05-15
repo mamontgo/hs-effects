@@ -29,7 +29,10 @@ class FutureTest extends AnyFunSuite {
       val effect = v.get >>= (res => println(res))
       IO.runEffect(effect)
     })
+  }
 
 
+  test("io future test") {
+//    ThreadIO.sleep(1000).future.z
   }
 }

@@ -9,6 +9,7 @@ trait All  extends ListInstances
   with BaseUtils
   with EitherInstances
   with ThreadIO
+  with TryInstances
 
 
 object All

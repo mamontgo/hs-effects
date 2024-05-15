@@ -20,7 +20,7 @@ private trait OptionInstances {
 
     override def ap[A](a: A): Applicative[Option, A] = Some(a)
 
-  implicit class OptionInstanceImpl[A](s: Option[A]) extends OptionApplicative(s) with OptionMonad(s) with OptionFunctor(s) with OptionFoldable(s)
+  implicit class OptionInstanceImpl[A](s: Option[A]) extends OptionApplicative(s) with OptionMonad(s) with OptionFunctor(s) with OptionFoldable(s) with OptionZip(s)
   implicit class OptionMonoidEffectTypeClass[B, F[_]](a: Option[Monoid[F, B]]) extends OptionMonoid(a)
 
   trait OptionMonad[A](s: Option[A]) extends Monad[Option, A] {
@@ -51,6 +51,13 @@ private trait OptionInstances {
     override def inst: Option[O[B]] = s.map(_.inst)
   }
 
+  trait OptionZip[A](s: Option[A]) extends Zip[Option, A] {
+    override def zipWith[B, C](o: Option[B])(zip: A => B => C): Option[C] = for {
+      si <- s
+      oi <- o
+    } yield zip(si)(oi)
+  }
+  
   trait OptionFoldable[A](s: Option[A]) extends Foldable[Option, A] {
     def foldLeft[B](b: B)(f: (B, A) => B): B = s.fold(b)(a => f(b, a))
 

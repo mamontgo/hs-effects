@@ -1,7 +1,7 @@
 package effects.instance
 
 import effects.Monad
-import effects.instance.All.*
+import effects.All.*
 import org.scalatest.funsuite.AnyFunSuite
 
 class IOTest extends AnyFunSuite {
@@ -20,13 +20,13 @@ class IOTest extends AnyFunSuite {
   }
 
   test("sequence IO ") {
-    val s = 1 to 10
+    val s: Seq[Int] = 1 to 10
     val r:Seq[IO[Unit]] = s.map(v => println(s"This is $v"))
+
     IO.runEffect(println(r))
 
     val y:IO[Seq[Unit]] = Monad.sequence(r.map(_.monad))
     IO.runEffect(y)
-
 
   }
 }

@@ -33,7 +33,6 @@ class OptionTest extends AnyFunSuite {
   }
 
   test("monoid option test") {
-
     val f= Some(Seq(1,2))
     val s = Some(Seq(3,4))
 
@@ -41,4 +40,8 @@ class OptionTest extends AnyFunSuite {
     assert(f.map(_.monoid).combine(s) == Option(Seq(1,2,3,4)))
   }
 
+  test("option zipWith") {
+    val res = Some(10).zipWith(Some(20))(curry((_:Int)+(_:Int)))
+    assert(res.contains(30))
+  }
 }

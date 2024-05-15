@@ -1,17 +1,24 @@
 package effects.instance
 
 import effects.instance.FunctionInstances.*
-import effects.instance.IO.{IOApplicative, IOFunctor, IOMonad, IOMonoid}
+import effects.instance.IO.{IOApplicative, IOFunctor, IOMonad, IOMonoid, IOZip}
 import effects.*
+
+import scala.concurrent.Future
 
 class IO[T] private(payLoad: () => T) {
   private def getPayload: () => T = payLoad
+//  def future: Future[T] = asFuture(this)
 }
 
 
 object IO {
 
   implicit def emptyIO[F[_], A](implicit empty: Empty[F, A]): Empty[IO, F[A]] = () => IO.create(empty())
+
+//  def asFuture[T](in: IO[T]):Future[T] = Future {
+//    runEffect(in)
+//  }
 
   def runEffect[T](in: IO[T]): T = in.getPayload()
 
@@ -51,10 +58,15 @@ object IO {
     override def inst: IO[A] = s
   }
 
+  trait IOZip[A](s: IO[A]) extends Zip[IO, A] {
+    override def zipWith[B, C](o: IO[B])(zip: A => B => C): IO[C] = IO.create(zip(s.getPayload())(o.getPayload()))
+      
+  }
+
 }
 
 trait IOInstances {
-  implicit class IOEffectTypeClass[A](a: IO[A]) extends IOMonad(a) with IOApplicative(a) with IOFunctor(a)
+  implicit class IOEffectTypeClass[A](a: IO[A]) extends IOMonad(a) with IOApplicative(a) with IOFunctor(a) with IOZip(a)
 
   implicit class IOMonoidEffectTypeClass[B, F[_]](a: IO[Monoid[F, B]]) extends IOMonoid(a)
 
@@ -66,7 +78,6 @@ trait IOInstances {
 
   implicit def pureIO: Pure[IO] = new Pure[IO]:
     override def apply[A](a: A): IO[A] = IO.create(a)
-
     override def ap[A](a: A): Applicative[IO, A] = IO.create(a).applicative
 }
 

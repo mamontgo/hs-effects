@@ -1,4 +1,4 @@
-import effects.instance.All.*
+import effects.All.*
 import effects.Functor.*
 import effects.instance.IO
 
@@ -7,18 +7,31 @@ import effects.instance.IO
 @main
 def main(): Unit = {
 
-  val example:IO[Unit] = println("hello world")
+  addNumbers()
+}
+
+def sayGoodbye(): Unit = {
+  val example: IO[Unit] = println("hello world")
   IO.runEffect(example)
 
-  val in:IO[String] = getConsoleLine("Enter your name: ")
-  val res:IO[Unit] = in
+  val in: IO[String] = getConsoleLine("Enter your name: ")
+  val res: IO[Unit] = in
     .map("goodbye " ++ _) >>= (println(_))
 
   IO.runEffect(res)
 }
 
+def addNumbers(): Unit = {
+  val addNumbers: Int => Int => Int = curry((_:Int) + (_:Int))
+  val first:IO[Int] = println("Enter first number") >> readline() <\> (_.toInt)
+  val second:IO[Int] = println("Enter second number") >> readline() <\> (_.toInt)
+
+  val add:IO[Unit] = first.zipWith(second)(addNumbers) <\> ("Result is: " ++ (_:Int).toString) >>= (println(_))
+
+  IO.runEffect(add)
 
 
+}
 
 
 def getConsoleLine(s: String): IO[String] = {

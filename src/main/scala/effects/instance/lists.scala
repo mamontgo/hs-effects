@@ -1,11 +1,14 @@
 package effects.instance
 
-import effects.{Applicative, ApplicativeConverter, Empty, Foldable, Functor, FunctorConverter, Monad, MonadConverter, Monoid, Pure, Return, Zip, ZipConverter}
+import effects.{Applicative, ApplicativeConverter, Empty, Foldable, Functor, FunctorConverter, Monad, MonadConverter, Monoid, MonoidConverter, Pure, Return, Zip, ZipConverter}
 
 import scala.language.implicitConversions
 
 
 private trait ListInstances {
+
+  implicit def seqMonoidConverter: MonoidConverter[Seq] = new MonoidConverter[Seq]:
+    override def to[A](inst: Seq[A]): Monoid[Seq, A] = inst.monoid
 
   implicit def seqFunctorConverter: FunctorConverter[Seq] = new FunctorConverter[Seq]:
     override def to[A](inst: Seq[A]): Functor[Seq, A] = inst.functor

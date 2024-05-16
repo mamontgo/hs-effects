@@ -21,10 +21,10 @@ trait EitherInstances {
 
   implicit def emptyEither[F[_], B](implicit empty: Empty[F, B]): Empty[[E] =>> Either[?, E], F[B]] = () => Right(empty())
 
-  implicit def eitherReturn[B]: Return[[F] =>> Either[?, F]] = new Return[[F] =>> Either[?, F]]:
-    override def apply[A](a: A): Either[?, A] = Right(a)
-    override def monad[A](a: A): Monad[[F] =>> Either[?, F], A] = Right(a)
-    override def toMonad[A](a: Either[?, A]): Monad[[F] =>> Either[?, F], A] = a.monad
+  implicit def eitherReturn[B]: Return[[F] =>> Either[B, F]] = new Return[[F] =>> Either[B, F]]:
+    override def apply[A](a: A): Either[B, A] = Right(a)
+    override def monad[A](a: A): Monad[[F] =>> Either[B, F], A] = Right(a)
+    override def toMonad[A](a: Either[B, A]): Monad[[F] =>> Either[B, F], A] = a.monad
 
   implicit def pureEither: Pure[[F] =>> Either[?, F]] = new Pure[[F] =>> Either[?, F]]:
     override def apply[A](a: A): Either[?, A] = Right(a)

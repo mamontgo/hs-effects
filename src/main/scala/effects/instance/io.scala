@@ -14,6 +14,7 @@ class IO[T] private(payLoad: () => T) {
 
 object IO {
 
+
   implicit def emptyIO[F[_], A](implicit empty: Empty[F, A]): Empty[IO, F[A]] = () => IO.create(empty())
 
   def asFuture[T](in: IO[T])(implicit executor: ExecutionContext):Future[T] = Future {    runEffect(in)   }

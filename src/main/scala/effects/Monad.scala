@@ -35,20 +35,21 @@ object Monad {
   def join[F[_], B](a: Monad[F, F[B]]): F[B] = a.flatMap(identity)
 
   
-  // F[M[A]] => M[F[A]]
-  def sequence[M[_], F <: Monad[M,A], A](s: Seq[F])(implicit p: Return[M]):M[Seq[A]] = {
-    mapM(identity[F])(s)(p)
+  // Seq[F[A]] => F[Seq[A]]
+  def sequence[M[_], A](s: Seq[M[A]])(implicit c: MonadConverter[M], r: Return[M]):M[Seq[A]] = {
+    mapM(identity[M[A]])(s)(c, r)
   }
 
-  def mapM[M[_], A, B](f:A => Monad[M, B])(l:Seq[A])(implicit p: Return[M]): M[Seq[B]] = {
-    val foldFunction: (A, Monad[M, Seq[B]]) => Monad[M, Seq[B]] = (a:A, r: Monad[M, Seq[B]]) => {
-       val y = for {
-        x <- f(a)
+  def mapM[M[_], A, B](f:A => M[B])(l:Seq[A])(implicit c: MonadConverter[M], r: Return[M]): M[Seq[B]] = {
+    val foldFunction: (A, Monad[M, Seq[B]]) => Monad[M, Seq[B]] = (a:A, r:  Monad[M, Seq[B]]) => {
+       val res = for {
+        x <- c.to(f(a))
         xs <- r
       } yield Seq(x) ++ xs
-        p.toMonad(y)
+        c.to(res)
     }
-    l.foldRight(p.monad(Seq()))(foldFunction).inst
+
+    l.foldRight(c.to(r(Seq[B]())))(foldFunction).inst
   }
 
 }

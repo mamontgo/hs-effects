@@ -7,9 +7,9 @@ import effects.Monad.*
 class EitherTest extends AnyFunSuite {
 
   test("sequence either items") {
-    val x = Seq(Right(1), Right(2), Right(3))
+    val x:Seq[Either[String, Int]] = Seq(Right(1), Right(2), Right(3))
 
-    val s:Either[String, Seq[Int]] = sequence(x.map(_.monad)).asInstanceOf[Either[String, Seq[Int]]]
+    val s:Either[String, Seq[Int]] = sequence(x)
 
 //    IO.runEffect(println(s))
 
@@ -18,17 +18,15 @@ class EitherTest extends AnyFunSuite {
   }
 
   test("sequence either items with left item") {
-    val x = Seq(Right(1), Right(2), Left("Oops"))
-
-    val s = sequence(x.map(_.monad)).asInstanceOf[Either[String, Seq[Int]]]
-
+    val x:Seq[Either[String, Int]] = Seq(Right(1), Right(2), Left("Oops"))
+    val s = sequence(x)
     assert(s == Left("Oops"))
   }
 
   test("sequence either items with multiple left item") {
-    val x = Seq(Right(1), Left("Oops"), Right(2), Left("Never here!"))
+    val x:Seq[Either[String, Int]]  = Seq(Right(1), Left("Oops"), Right(2), Left("Never here!"))
 
-    val s = sequence(x.map(_.monad)).asInstanceOf[Either[String, Seq[Int]]]
+    val s = sequence(x)
 
     assert(s == Left("Oops"))
   }

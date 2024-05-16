@@ -7,7 +7,16 @@ private trait OptionInstances {
 
   implicit def optionZipConverter: ZipConverter[Option] = new ZipConverter[Option]:
     override def to[A](a: Option[A]): Zip[Option, A] = a.asZip
+    
+  implicit def optionFunctorConverter: FunctorConverter[Option] = new FunctorConverter[Option]:
+    override def to[A](inst: Option[A]): Functor[Option, A] = inst.functor
 
+  implicit def optionMonadConverter: MonadConverter[Option] = new MonadConverter[Option]:
+    override def to[A](inst: Option[A]): Monad[Option, A] = inst.monad
+
+  implicit def optionApplicativeConverter: ApplicativeConverter[Option] = new ApplicativeConverter[Option]:
+    override def to[A](inst: Option[A]): Applicative[Option, A] = inst.applicative
+  
   implicit def emptyOption[A]: Empty[Option, A] = () => None
 
   implicit def returnOption: Return[Option] = new Return[Option]:

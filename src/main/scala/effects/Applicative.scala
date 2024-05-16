@@ -8,6 +8,9 @@ trait Pure[F[_]] {
   def ap[A](a:A): Applicative[F, A]
 }
 
+trait ApplicativeConverter[F[_]] extends EffectConverter[F, Applicative]:
+  override def from[A](e: Applicative[F, A]): F[A] = e.inst
+
 
 trait Applicative[F[_], A] extends Monad[F, A] {
 

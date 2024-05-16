@@ -4,6 +4,9 @@ trait Empty[F[_], A] {
   def apply(): F[A]
 }
 
+trait MonoidConverter[F[_]] extends EffectConverter[F, Monoid]:
+  override def from[A](e: Monoid[F, A]): F[A] = e.inst
+
 
 trait Monoid[F[_], A] extends SemiGroup[F, A] with Effect[F, A] {
   def empty(implicit e: Empty[F, A]): F[A] = e()

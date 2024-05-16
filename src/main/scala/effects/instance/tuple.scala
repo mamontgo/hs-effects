@@ -1,10 +1,20 @@
 package effects.instance
 
 import effects.syntax.FunctionSyntax
-import effects.{Applicative, Empty, Foldable, Functor, Monad, Monoid, Pure, Return}
+import effects.{Applicative, ApplicativeConverter, Empty, Foldable, Functor, FunctorConverter, Monad, MonadConverter, Monoid, Pure, Return}
 
 
 trait TupleInstances {
+
+
+  implicit def tupleFunctorConverter[B]: FunctorConverter[[E] =>> (B, E)] = new FunctorConverter[[E] =>> (B, E)]:
+    override def to[A](inst: (B, A)): Functor[[E] =>> (B, E), A] = inst.functor
+
+  implicit def tupleMonadConverter[B]: MonadConverter[[E] =>> (B, E)] = new MonadConverter[[E] =>> (B, E)]:
+    override def to[A](inst: (B, A)): Monad[[E] =>> (B, E), A] = inst.monad
+
+  implicit def tupleApplicativeConverter[B]: ApplicativeConverter[[E] =>> (B, E)] = new ApplicativeConverter[[E] =>> (B, E)]:
+    override def to[A](inst: (B, A)): Applicative[[E] =>> (B, E), A] = inst.applicative
 
   implicit def emptyTuple[F[_], B](implicit empty: Empty[F, B]): Empty[[E] =>> (?, E), F[B]] = () => (empty(), empty())
 

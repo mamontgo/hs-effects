@@ -6,7 +6,6 @@ trait All  extends ListInstances
   with OptionInstances
   with IOInstances
   with Console
-  with BaseUtils
   with EitherInstances
   with ThreadIO
   with TryInstances

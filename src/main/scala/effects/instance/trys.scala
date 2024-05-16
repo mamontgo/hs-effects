@@ -1,11 +1,20 @@
 package effects.instance
 
-import effects.{Applicative, Empty, Functor, Monad, Monoid, Pure, Return}
+import effects.{Applicative, ApplicativeConverter, Empty, Functor, FunctorConverter, Monad, MonadConverter, Monoid, Pure, Return}
 
 import scala.util.{Success, Try}
 
 trait TryInstances {
 
+  implicit def tryFunctorConverter: FunctorConverter[Try] = new FunctorConverter[Try]:
+    override def to[A](inst: Try[A]): Functor[Try, A] = inst.functor
+
+  implicit def tryMonadConverter: MonadConverter[Try] = new MonadConverter[Try]:
+    override def to[A](inst: Try[A]): Monad[Try, A] = inst.monad
+
+  implicit def tryApplicativeConverter: ApplicativeConverter[Try] = new ApplicativeConverter[Try]:
+    override def to[A](inst: Try[A]): Applicative[Try, A] = inst.applicative
+  
   implicit def emptyTry[F[_], A](implicit empty: Empty[F, A]): Empty[Try, F[A]] = () => Success(empty())
 
   implicit def returnTry: Return[Try] = new Return[Try]:

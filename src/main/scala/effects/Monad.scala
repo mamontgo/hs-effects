@@ -2,6 +2,9 @@ package effects
 
 import scala.annotation.targetName
 
+trait MonadConverter[F[_]] extends EffectConverter[F, Monad]:
+  override def from[A](e: Monad[F, A]): F[A] = e.inst
+
 trait Return[F[_]] {
   def apply[A](a: A): F[A]
 

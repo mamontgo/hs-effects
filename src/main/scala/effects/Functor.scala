@@ -2,9 +2,13 @@ package effects
 
 import scala.annotation.targetName
 
+trait FunctorConverter[F[_]] extends EffectConverter[F, Functor]:
+  override def from[A](e: Functor[F, A]): F[A] = e.inst
+
+
 
 // F[A] => (A => B) => F[B]
-trait Functor[+F[_], A] extends Effect[F, A] {
+trait Functor[F[_], A] extends Effect[F, A] {
   def map[B](f: A => B): F[B]
 
   @targetName("extMap")

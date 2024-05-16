@@ -64,6 +64,16 @@ object IO {
 }
 
 trait IOInstances {
+
+  implicit def ioFunctorConverter: FunctorConverter[IO] = new FunctorConverter[IO]:
+    override def to[A](inst: IO[A]): Functor[IO, A] = inst.functor
+
+  implicit def ioMonadConverter: MonadConverter[IO] = new MonadConverter[IO]:
+    override def to[A](inst: IO[A]): Monad[IO, A] = inst.monad
+
+  implicit def ioApplicativeConverter: ApplicativeConverter[IO] = new ApplicativeConverter[IO]:
+    override def to[A](inst: IO[A]): Applicative[IO, A] = inst.applicative
+  
   implicit class IOEffectTypeClass[A](a: IO[A]) extends IOMonad(a) with IOApplicative(a) with IOFunctor(a) with IOZip(a)
 
   implicit class IOMonoidEffectTypeClass[B, F[_]](a: IO[Monoid[F, B]]) extends IOMonoid(a)

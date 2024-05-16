@@ -1,10 +1,18 @@
 package effects.instance
 
 import effects.syntax.FunctionSyntax.*
-import effects.{Applicative, Functor, Monad, Pure, Return, Zip, ZipConverter}
+import effects.{Applicative, ApplicativeConverter, Functor, FunctorConverter, Monad, MonadConverter, Pure, Return, Zip, ZipConverter}
 
 private trait FunctionInstances {
 
+  implicit def functionFunctorConverter[B]: FunctorConverter[[F] =>> B => F] = new FunctorConverter[[F] =>> B => F]:
+    override def to[A](inst: B => A): Functor[[F] =>> B => F, A] = inst.functor
+
+  implicit def functionMonadConverter[B]: MonadConverter[[F] =>> B => F] = new MonadConverter[[F] =>> B => F]:
+    override def to[A](inst: B => A): Monad[[F] =>> B => F, A] = inst.monad
+
+  implicit def functionApplicativeConverter[B]: ApplicativeConverter[[F] =>> B => F] = new ApplicativeConverter[[F] =>> B => F]:
+    override def to[A](inst: B => A): Applicative[[F] =>> B => F, A] = inst.applicative
 
   implicit class FunctionInstanceImpl[A, B](s: A => B) extends FunctionFunctor(s) with FunctionApplicative(s) with FunctionMonad(s) with FunctionZip(s)
   implicit class ProducerInstanceImpl[A](s: () => A) extends ProducerFunctor(s) with ProducerApplicative(s) with ProducerMonad(s) with ProducerZip(s)

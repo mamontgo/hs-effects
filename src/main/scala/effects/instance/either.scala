@@ -1,11 +1,21 @@
 package effects.instance
 
 import effects.syntax.FunctionSyntax
-import effects.{Applicative, Empty, Foldable, Functor, Monad, Monoid, Pure, Return, Zip, ZipConverter}
+import effects.{Applicative, ApplicativeConverter, Empty, Foldable, Functor, FunctorConverter, Monad, MonadConverter, Monoid, Pure, Return, Zip, ZipConverter}
 
 
 trait EitherInstances {
 
+  implicit def eitherFunctorConverter[B]: FunctorConverter[[F] =>> Either[B, F]] = new FunctorConverter[[F] =>> Either[B, F]]:
+    override def to[A](inst: Either[B, A]): Functor[[F] =>> Either[B, F], A] = inst.functor
+
+  implicit def eitherMonadConverter[B]: MonadConverter[[F] =>> Either[B, F]] = new MonadConverter[[F] =>> Either[B, F]]:
+    override def to[A](inst: Either[B, A]): Monad[[F] =>> Either[B, F], A] = inst.monad
+
+  implicit def eitherApplicativeConverter[B]: ApplicativeConverter[[F] =>> Either[B, F]] = new ApplicativeConverter[[F] =>> Either[B, F]]:
+    override def to[A](inst: Either[B, A]): Applicative[[F] =>> Either[B, F], A] = inst.applicative
+
+  
   implicit def eitherZipConverter[B]: ZipConverter[[F] =>> Either[B, F]] = new ZipConverter[[F] =>> Either[B, F]]:
     override def to[A](a: Either[B, A]): Zip[[F] =>> Either[B, F], A] = a.inst
 

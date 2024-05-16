@@ -26,8 +26,6 @@ private trait OptionInstances {
   implicit def pureOption: Pure[Option] = new Pure[Option]:
     override def apply[A](a: A): Option[A] = Some(a)
 
-    override def ap[A](a: A): Applicative[Option, A] = Some(a)
-
   implicit class OptionInstanceImpl[A](s: Option[A]) extends OptionApplicative(s) with OptionMonad(s) with OptionFunctor(s) with OptionFoldable(s) with OptionZip(s)
   implicit class OptionMonoidEffectTypeClass[B, F[_]](a: Option[Monoid[F, B]]) extends OptionMonoid(a)
 

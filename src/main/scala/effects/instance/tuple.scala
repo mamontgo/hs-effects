@@ -20,12 +20,10 @@ trait TupleInstances {
 
   implicit def tupleReturn[B[_] <: Monoid[B, C], C](implicit empty: Empty[B, C]): Return[[F] =>> (?, F)] = new Return[[F] =>> (?, F)]:
     override def apply[A](a: A): (B[C], A) = (empty(), a)
-  
+
 
   implicit def pureTuple[B[_] <: Monoid[B, C], C](implicit empty: Empty[B, C]): Pure[[F] =>> (?, F)] = new Pure[[F] =>> (?, F)]:
     override def apply[A](a: A): (?, A) = (empty(), a)
-
-    override def ap[A](a: A): Applicative[[F] =>> (?, F), A] = (empty(), a)
 
   implicit class TupleInstanceImpl[A, B](s: (A, B)) extends TupleApplicative(s) with TupleMonad(s) with TupleFunctor(s) with TupleFoldable(s)
 

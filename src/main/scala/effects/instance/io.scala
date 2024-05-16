@@ -89,7 +89,6 @@ trait IOInstances {
 
   implicit def pureIO: Pure[IO] = new Pure[IO]:
     override def apply[A](a: A): IO[A] = IO.create(a)
-    override def ap[A](a: A): Applicative[IO, A] = IO.create(a).applicative
 }
 
 object IOInstances extends IOInstances

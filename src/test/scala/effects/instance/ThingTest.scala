@@ -1,7 +1,7 @@
 package effects.instance
 
 import effects.instance.All.*
-import effects.{Applicative, Functor, Monad, Pure, Return}
+import effects.{Applicative, Functor, Monad, MonadConverter, Pure, Return}
 import org.scalatest.funsuite.AnyFunSuite
 
 import scala.language.implicitConversions
@@ -11,12 +11,15 @@ case class Thing[A](inner: A)
 object Thing {
 
 
+  implicit def returnMonadConverter: MonadConverter[Thing] = new MonadConverter[Thing] {
+    override def to[A](inst: Thing[A]): Monad[Thing, A] = inst.monad
+  }
+
   implicit def returnThing: Return[Thing] = new Return[Thing]:
     override def apply[A](a: A): Thing[A] = Thing(a)
 
   implicit def pureThing: Pure[Thing] = new Pure[Thing]:
     override def apply[A](a: A): Thing[A] = Thing(a)
-    override def ap[A](a:A): Applicative[Thing, A] = Thing(a)
 
   implicit class ThingInstance[A](s:Thing[A]) extends ThingFunctor(s) with ThingMonad(s) with ThingApplicative(s)
   
@@ -74,13 +77,13 @@ class ThingTest extends AnyFunSuite {
 
   test("join nested Seq monad") {
     val nested = Seq(Seq(123))
-    val y = Monad.join(nested.monad)
+    val y = Monad.join(nested)
     assert(y == Seq(123))
   }
 
   test("join nested Thing monad") {
     val nested = Thing(Thing(123))
-    val y = Monad.join(nested.monad)
+    val y = Monad.join(nested)
     assert(y == Thing(123))
   }
 

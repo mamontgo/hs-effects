@@ -24,7 +24,6 @@ private trait FutureInstances(implicit executor: ExecutionContext) {
 
   implicit def pureFuture: Pure[Future] = new Pure[Future]:
     override def apply[A](a: A): Future[A] = Future(a)
-    override def ap[A](a: A): Applicative[Future, A] = Future(a)
 
   implicit class FutureInstanceImpl[A](s: Future[A]) extends FutureFunctor(s) with FutureMonad(s) with FutureApplicative(s) with FutureZip(s)
 

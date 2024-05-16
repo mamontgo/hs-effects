@@ -26,7 +26,6 @@ trait EitherInstances {
 
   implicit def pureEither: Pure[[F] =>> Either[?, F]] = new Pure[[F] =>> Either[?, F]]:
     override def apply[A](a: A): Either[?, A] = Right(a)
-    override def ap[A](a: A): Applicative[[F] =>> Either[?, F], A] = Right(a)
 
   implicit class EitherInstanceImpl[A, B](s: Either[A, B]) extends EitherApplicative(s) with EitherMonad(s) with EitherFunctor(s) with EitherZip(s)
   implicit class EitherMonoidEffectTypeClass[A, E[_], B](s: Either[A, Monoid[E, B]]) extends EitherMonoid(s)

@@ -35,14 +35,12 @@ private trait FunctionInstances {
 
   implicit def pureFunction: Pure[[F] =>> ? => F] = new Pure[[F] =>> ? => F]:
     override def apply[A](a: A): ? => A = const(a)
-    override def ap[A](a: A): Applicative[[F] =>> ? => F,A] = const(a)
 
   implicit def returnPartialFunction: Return[[F] =>> () => F] = new Return[[F] =>> () => F]:
     override def apply[A](a: A): () => A = () => a
 
   implicit def purePartialFunction: Pure[[F] =>> () => F] = new Pure[[F] =>> () => F]:
     override def apply[A](a: A): () => A = () => a
-    override def ap[A](a: A): Applicative[[F] =>> () => F, A] = () => a
 
   trait FunctionApplicative[A, B](s: A => B) extends Applicative[[F] =>> A => F, B] {
     override def ap[C](app: A => (B => C)): A => C = (a:A) => app(a)(s(a))

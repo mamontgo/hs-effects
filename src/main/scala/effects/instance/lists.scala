@@ -29,7 +29,6 @@ private trait ListInstances {
 
   implicit def pureSeq: Pure[Seq] = new Pure[Seq]:
     override def apply[A](a: A): Seq[A] = Seq(a)
-    override def ap[A](a: A): Applicative[Seq, A] = Seq(a)
 
   implicit class SeqInstanceImpl[A](s: Seq[A]) extends SeqApplicative(s) with SeqMonad(s) with SeqFunctor(s) with SeqMonoid(s) with SeqFoldable(s) with SeqZip(s)
 

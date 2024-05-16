@@ -23,8 +23,6 @@ trait TryInstances {
 
   implicit def pureTry: Pure[Try] = new Pure[Try]:
     override def apply[A](a: A): Try[A] = Success(a)
-    override def ap[A](a: A): Applicative[Try, A] = Success(a).applicative
-
 
   implicit class TryEffectTypeClass[A](a: Try[A]) extends TryMonad(a) with TryApplicative(a) with TryFunctor(a) with TryIO(a)
 

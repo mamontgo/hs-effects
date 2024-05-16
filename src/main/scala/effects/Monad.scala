@@ -28,7 +28,9 @@ trait Monad[F[_], A] extends Functor[F, A] {
 object Monad {
 
   // M[M[A]] => M[A]
-  def join[F[_], B](a: Monad[F, F[B]]): F[B] = a.flatMap(identity)
+  def join[F[_], B](a:F[F[B]])(implicit c: MonadConverter[F]): F[B] = {
+    c.to(a).flatMap(identity)
+  }
 
   
   // Seq[F[A]] => F[Seq[A]]

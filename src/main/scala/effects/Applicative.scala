@@ -5,7 +5,6 @@ import scala.annotation.targetName
 
 trait Pure[F[_]] {
   def apply[A](a:A):F[A]
-  def ap[A](a:A): Applicative[F, A]
 }
 
 trait ApplicativeConverter[F[_]] extends EffectConverter[F, Applicative]:

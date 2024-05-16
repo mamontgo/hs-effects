@@ -7,10 +7,6 @@ trait MonadConverter[F[_]] extends EffectConverter[F, Monad]:
 
 trait Return[F[_]] {
   def apply[A](a: A): F[A]
-
-  def monad[A](a: A): Monad[F, A]
-
-  def toMonad[A](a: F[A]): Monad[F, A]
 }
 
 

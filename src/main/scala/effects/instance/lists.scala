@@ -26,8 +26,6 @@ private trait ListInstances {
 
   implicit def returnSeq: Return[Seq] = new Return[Seq]:
     override def apply[A](a: A): Seq[A] = Seq(a)
-    override def monad[A](a: A): Monad[Seq, A] = this(a).monad
-    override def toMonad[A](a: Seq[A]): Monad[Seq, A] = a.monad
 
   implicit def pureSeq: Pure[Seq] = new Pure[Seq]:
     override def apply[A](a: A): Seq[A] = Seq(a)

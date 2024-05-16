@@ -85,8 +85,6 @@ trait IOInstances {
 
   implicit def returnIO: Return[IO] = new Return[IO]:
     override def apply[A](a: A): IO[A] = IO.create(a)
-    override def monad[A](a: A): Monad[IO, A] = this (a).monad
-    override def toMonad[A](a: IO[A]): Monad[IO, A] = a.monad
 
 
   implicit def pureIO: Pure[IO] = new Pure[IO]:

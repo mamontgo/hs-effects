@@ -21,8 +21,6 @@ private trait FutureInstances(implicit executor: ExecutionContext) {
 
   implicit def returnFuture: Return[Future] = new Return[Future]:
     override def apply[A](a: A): Future[A] = Future(a)
-    override def monad[A](a: A): Monad[Future, A] = this (a).monad
-    override def toMonad[A](a: Future[A]): Monad[Future, A] = a.monad
 
   implicit def pureFuture: Pure[Future] = new Pure[Future]:
     override def apply[A](a: A): Future[A] = Future(a)

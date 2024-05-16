@@ -13,8 +13,6 @@ object Thing {
 
   implicit def returnThing: Return[Thing] = new Return[Thing]:
     override def apply[A](a: A): Thing[A] = Thing(a)
-    override def monad[A](a: A): Monad[Thing, A] = this (a).monad
-    override def toMonad[A](a: Thing[A]): Monad[Thing, A] = a.monad
 
   implicit def pureThing: Pure[Thing] = new Pure[Thing]:
     override def apply[A](a: A): Thing[A] = Thing(a)

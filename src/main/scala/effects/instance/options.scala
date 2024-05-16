@@ -22,10 +22,6 @@ private trait OptionInstances {
   implicit def returnOption: Return[Option] = new Return[Option]:
     override def apply[A](a: A): Option[A] = Some(a)
 
-    override def monad[A](a: A): Monad[Option, A] = this (a).monad
-
-    override def toMonad[A](a: Option[A]): Monad[Option, A] = a.monad
-
 
   implicit def pureOption: Pure[Option] = new Pure[Option]:
     override def apply[A](a: A): Option[A] = Some(a)

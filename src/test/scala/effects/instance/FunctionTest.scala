@@ -1,6 +1,7 @@
 package effects.instance
 
-import effects.All._
+import effects.All.*
+import effects.Monad
 import org.scalatest.funsuite.AnyFunSuite
 
 class FunctionTest extends AnyFunSuite {
@@ -51,6 +52,12 @@ class FunctionTest extends AnyFunSuite {
     val three = () => 3
     val f = two.zipWith(three)(curry((_: Int) + (_: Int)))
     assert(f() == 5)
+
+  }
+
+  test("sequence functions?") {
+    val l:Seq[Int => Int] = (1 to 10).map(x => x+(_:Int))
+    val x: Int => Seq[Int] = Monad.sequence(l)
 
 
   }

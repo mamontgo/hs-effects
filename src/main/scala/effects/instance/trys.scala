@@ -19,8 +19,7 @@ trait TryInstances {
 
   implicit def returnTry: Return[Try] = new Return[Try]:
     override def apply[A](a: A): Try[A] = Success(a)
-    override def monad[A](a: A): Monad[Try, A] = this (a).monad
-    override def toMonad[A](a: Try[A]): Monad[Try, A] = a.monad
+
 
   implicit def pureTry: Pure[Try] = new Pure[Try]:
     override def apply[A](a: A): Try[A] = Success(a)

@@ -5,6 +5,16 @@ import effects.{Applicative, ApplicativeConverter, Functor, FunctorConverter, Mo
 
 private trait FunctionInstances {
 
+  implicit def partialFunctionFunctorConverter: FunctorConverter[[F] =>> () => F] = new FunctorConverter[[F] =>> () => F]:
+    override def to[A](inst: () => A): Functor[[F] =>> () => F, A] = inst.functor
+
+  implicit def partialFunctionMonadConverter: MonadConverter[[F] =>> () => F] = new MonadConverter[[F] =>> () => F]:
+    override def to[A](inst: () => A): Monad[[F] =>> () => F, A] = inst.monad
+
+  implicit def partialFunctionApplicativeConverter: ApplicativeConverter[[F] =>> () => F] = new ApplicativeConverter[[F] =>> () => F]:
+    override def to[A](inst: () => A): Applicative[[F] =>> () => F, A] = inst.applicative
+
+
   implicit def functionFunctorConverter[B]: FunctorConverter[[F] =>> B => F] = new FunctorConverter[[F] =>> B => F]:
     override def to[A](inst: B => A): Functor[[F] =>> B => F, A] = inst.functor
 
@@ -20,10 +30,8 @@ private trait FunctionInstances {
   implicit def functionZipConverter[B]: ZipConverter[[F] =>> B => F] = new ZipConverter[[F] =>> B => F]:
     override def to[A](a: B => A): Zip[[F] =>> B => F, A] = a.asZip
 
-  implicit def returnFunction: Return[[F] =>> ? => F] = new Return[[F] =>> ? => F]:
-    override def apply[A](a: A): ? => A = const(a)
-    override def monad[A](a: A): Monad[[F] =>> ? => F, A] = this (a).monad
-    override def toMonad[A](a: ? => A): Monad[[F] =>> Function[_, F], A] = a.monad
+  implicit def returnFunction[B]: Return[[F] =>> B => F] = new Return[[F] =>> B => F]:
+    override def apply[A](a: A): B => A = const(a)
 
   implicit def pureFunction: Pure[[F] =>> ? => F] = new Pure[[F] =>> ? => F]:
     override def apply[A](a: A): ? => A = const(a)
@@ -31,8 +39,6 @@ private trait FunctionInstances {
 
   implicit def returnPartialFunction: Return[[F] =>> () => F] = new Return[[F] =>> () => F]:
     override def apply[A](a: A): () => A = () => a
-    override def monad[A](a: A): Monad[[F] =>> () => F, A] = this (a).monad
-    override def toMonad[A](a: () => A): Monad[[F] =>> () => F, A] = a.monad
 
   implicit def purePartialFunction: Pure[[F] =>> () => F] = new Pure[[F] =>> () => F]:
     override def apply[A](a: A): () => A = () => a

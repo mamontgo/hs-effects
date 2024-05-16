@@ -6,6 +6,17 @@ import effects.instance.IO
 
 class MonadTest extends AnyFunSuite {
 
+
+  test("flat map of option") {
+
+    val addOneSomeNumber:Int => Option[Int] = a => Some(a+1)
+
+    val res = Some(123) >>= addOneSomeNumber
+    val res2 = Some(123).flatMap(addOneSomeNumber)
+    assert(res == res2)
+    assert(res.contains(124))
+  }
+
   test("Option As Monad ") {
     val x = Some(123).monad;
     println(x)

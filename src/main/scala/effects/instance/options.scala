@@ -5,6 +5,9 @@ import effects.*
 
 private trait OptionInstances {
 
+  implicit def optionZipConverter: ZipConverter[Option] = new ZipConverter[Option]:
+    override def to[A](a: Option[A]): Zip[Option, A] = a.asZip
+
   implicit def emptyOption[A]: Empty[Option, A] = () => None
 
   implicit def returnOption: Return[Option] = new Return[Option]:

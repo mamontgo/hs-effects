@@ -1,11 +1,14 @@
 package effects.instance
 
-import effects.{Applicative, Empty, Foldable, Functor, Monad, Monoid, Pure, Return, Zip}
+import effects.{Applicative, Empty, Foldable, Functor, Monad, Monoid, Pure, Return, Zip, ZipConverter}
 
 import scala.language.implicitConversions
 
 
 private trait ListInstances {
+
+  implicit def seqZipConverter: ZipConverter[Seq] = new ZipConverter[Seq]:
+    override def to[A](a: Seq[A]): Zip[Seq, A] = a.asZip
 
   implicit def emptySeq[A]: Empty[Seq, A] = () => Seq()
 

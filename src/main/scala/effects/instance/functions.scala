@@ -1,7 +1,7 @@
 package effects.instance
 
 import effects.syntax.FunctionSyntax.*
-import effects.{Applicative, Functor, Monad, Pure, Return, Zip}
+import effects.{Applicative, Functor, Monad, Pure, Return, Zip, ZipConverter}
 
 private trait FunctionInstances {
 
@@ -9,6 +9,8 @@ private trait FunctionInstances {
   implicit class FunctionInstanceImpl[A, B](s: A => B) extends FunctionFunctor(s) with FunctionApplicative(s) with FunctionMonad(s) with FunctionZip(s)
   implicit class ProducerInstanceImpl[A](s: () => A) extends ProducerFunctor(s) with ProducerApplicative(s) with ProducerMonad(s) with ProducerZip(s)
 
+  implicit def functionZipConverter[B]: ZipConverter[[F] =>> B => F] = new ZipConverter[[F] =>> B => F]:
+    override def to[A](a: B => A): Zip[[F] =>> B => F, A] = a.asZip
 
   implicit def returnFunction: Return[[F] =>> ? => F] = new Return[[F] =>> ? => F]:
     override def apply[A](a: A): ? => A = const(a)

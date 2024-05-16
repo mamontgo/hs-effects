@@ -4,7 +4,7 @@ import scala.annotation.targetName
 
 
 // F[A] => (A => B) => F[B]
-trait Functor[F[_], A] extends Effect[F, A] {
+trait Functor[+F[_], A] extends Effect[F, A] {
   def map[B](f: A => B): F[B]
 
   @targetName("extMap")

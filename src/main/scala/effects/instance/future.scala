@@ -1,10 +1,13 @@
 package effects.instance
 
-import effects.{Applicative, Functor, Monad, Pure, Return}
+import effects.{All, Applicative, Functor, Monad, Pure, Return, Zip, ZipConverter}
 
 import scala.concurrent.{ExecutionContext, Future}
 
 private trait FutureInstances(implicit executor: ExecutionContext) {
+
+  implicit def futureZipConverter: ZipConverter[Future] = new ZipConverter[Future]:
+    override def to[A](a: Future[A]): Zip[Future, A] = a.asZip
 
 
   implicit def returnFuture: Return[Future] = new Return[Future]:
@@ -16,7 +19,11 @@ private trait FutureInstances(implicit executor: ExecutionContext) {
     override def apply[A](a: A): Future[A] = Future(a)
     override def ap[A](a: A): Applicative[Future, A] = Future(a)
 
-  implicit class FutureInstanceImpl[A](s: Future[A]) extends FutureFunctor(s) with FutureMonad(s) with FutureApplicative(s)
+  implicit class FutureInstanceImpl[A](s: Future[A]) extends FutureFunctor(s) with FutureMonad(s) with FutureApplicative(s) with FutureZip(s)
+
+  trait FutureZip[A](s: Future[A]) extends Zip[Future, A] {
+    override def zipWith[B, C](o: Future[B])(zip: A => B => C): Future[C] = s.zipWith(o)(All.uncurry(zip))
+  }
 
   trait FutureApplicative[A](s: Future[A]) extends Applicative[Future, A] {
     override def ap[B](a: Future[A => B]): Future[B] = a.flatMap(f => s.map(v => f(v)))

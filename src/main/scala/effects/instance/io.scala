@@ -1,14 +1,14 @@
 package effects.instance
 
 import effects.instance.FunctionInstances.*
-import effects.instance.IO.{IOApplicative, IOFunctor, IOMonad, IOMonoid, IOZip}
+import effects.instance.IO.{IOApplicative, IOFunctor, IOMonad, IOMonoid, IOZip, asFuture}
 import effects.*
 
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
 class IO[T] private(payLoad: () => T) {
   private def getPayload: () => T = payLoad
-//  def future: Future[T] = asFuture(this)
+  def future(implicit executor: ExecutionContext): Future[T] = asFuture(this)
 }
 
 
@@ -16,9 +16,7 @@ object IO {
 
   implicit def emptyIO[F[_], A](implicit empty: Empty[F, A]): Empty[IO, F[A]] = () => IO.create(empty())
 
-//  def asFuture[T](in: IO[T]):Future[T] = Future {
-//    runEffect(in)
-//  }
+  def asFuture[T](in: IO[T])(implicit executor: ExecutionContext):Future[T] = Future {    runEffect(in)   }
 
   def runEffect[T](in: IO[T]): T = in.getPayload()
 
@@ -69,6 +67,10 @@ trait IOInstances {
   implicit class IOEffectTypeClass[A](a: IO[A]) extends IOMonad(a) with IOApplicative(a) with IOFunctor(a) with IOZip(a)
 
   implicit class IOMonoidEffectTypeClass[B, F[_]](a: IO[Monoid[F, B]]) extends IOMonoid(a)
+
+  implicit def ioZipConverter: ZipConverter[IO] = new ZipConverter[IO]:
+    override def to[A](a: IO[A]): Zip[IO, A] = a.asZip
+
 
   implicit def returnIO: Return[IO] = new Return[IO]:
     override def apply[A](a: A): IO[A] = IO.create(a)

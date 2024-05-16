@@ -1,7 +1,7 @@
 package effects
 
 import org.scalatest.funsuite.AnyFunSuite
-import effects.instance.All.*
+import effects.All.*
 import effects.instance.IO
 
 class MonadTest extends AnyFunSuite {

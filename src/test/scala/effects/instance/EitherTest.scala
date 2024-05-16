@@ -1,7 +1,7 @@
 package effects.instance
 
 import effects.Functor.liftF
-import effects.instance.All._
+import effects.All._
 import org.scalatest.funsuite.AnyFunSuite
 
 class EitherTest extends AnyFunSuite {

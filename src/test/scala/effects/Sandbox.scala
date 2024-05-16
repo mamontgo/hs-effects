@@ -1,6 +1,6 @@
 package effects
 
-import effects.instance.All.*
+import effects.All.*
 import effects.instance.IO
 import org.scalatest.funsuite.AnyFunSuite
 

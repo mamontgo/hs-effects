@@ -1,6 +1,6 @@
 package effects
 
-object All extends effects.instance.All with effects.syntax.All
+object All extends effects.instance.All with effects.syntax.All with effects.utils.All
 
 
 trait Effect[F[_], A] {

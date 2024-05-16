@@ -1,6 +1,6 @@
 package effects.instance
 
-import effects.instance.All.*
+import effects.All.*
 import org.scalatest.funsuite.AnyFunSuite
 
 import scala.runtime.Nothing$

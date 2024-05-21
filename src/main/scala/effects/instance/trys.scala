@@ -1,10 +1,14 @@
 package effects.instance
 
-import effects.{Applicative, ApplicativeConverter, Empty, Functor, FunctorConverter, Monad, MonadConverter, Monoid, Pure, Return}
+import effects.{Applicative, ApplicativeConverter, Empty, Functor, FunctorConverter, Monad, MonadConverter, Monoid, MonoidConverter, Pure, Return}
 
 import scala.util.{Success, Try}
 
 trait TryInstances {
+
+  implicit def tryMonoidConverter[F[_], A](implicit innerConverter: MonoidConverter[F, A]): MonoidConverter[Try, F[A]] = (inst: Try[F[A]]) => {
+    inst.map(innerConverter.to).monoid
+  }
 
   implicit def tryFunctorConverter: FunctorConverter[Try] = new FunctorConverter[Try]:
     override def to[A](inst: Try[A]): Functor[Try, A] = inst.functor

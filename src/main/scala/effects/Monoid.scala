@@ -4,8 +4,9 @@ trait Empty[F[_], A] {
   def apply(): F[A]
 }
 
-trait MonoidConverter[F[_]] extends EffectConverter[F, Monoid]:
-  override def from[A](e: Monoid[F, A]): F[A] = e.inst
+trait MonoidConverter[F[_], A]:
+  def from(e: Monoid[F, A]): F[A] = e.inst
+  def to(i: F[A]): Monoid[F, A]
 
 
 trait Monoid[F[_], A] extends SemiGroup[F, A] with Effect[F, A] {
@@ -15,8 +16,8 @@ trait Monoid[F[_], A] extends SemiGroup[F, A] with Effect[F, A] {
 }
 
 object Monoid {
-  def mconcat[F[_], A](l: Seq[Monoid[F, A]])(implicit empty: Empty[F, A]): F[A] = {
-    l.foldRight(empty()) { (a, b) => a.combine(b)
+  def mconcat[F[_], A](l: Seq[F[A]])(implicit empty: Empty[F, A], c: MonoidConverter[F, A]): F[A] = {
+    l.foldRight(empty()) { (a, b) => c.to(a).combine(b)
     }
   }
 }

@@ -66,6 +66,10 @@ object IO {
 
 trait IOInstances {
 
+  implicit def ioMonoidConverter[F[_], A](implicit innerConverter: MonoidConverter[F, A]): MonoidConverter[IO, F[A]] = (inst: IO[F[A]]) => {
+    inst.map(innerConverter.to).monoid
+  }
+
   implicit def ioFunctorConverter: FunctorConverter[IO] = new FunctorConverter[IO]:
     override def to[A](inst: IO[A]): Functor[IO, A] = inst.functor
 

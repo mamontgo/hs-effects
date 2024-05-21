@@ -1,10 +1,16 @@
 package effects.instance
 
-import effects.{All, Applicative, ApplicativeConverter, Functor, FunctorConverter, Monad, MonadConverter, Pure, Return, Zip, ZipConverter}
+import scala.concurrent.ExecutionContext.Implicits.global
+
+import effects.{All, Applicative, ApplicativeConverter, Functor, FunctorConverter, Monad, MonadConverter, Monoid, MonoidConverter, Pure, Return, Zip, ZipConverter}
 
 import scala.concurrent.{ExecutionContext, Future}
 
-private trait FutureInstances(implicit executor: ExecutionContext) {
+trait FutureInstances(implicit executor: ExecutionContext) {
+
+  implicit def futureMonoidConverter[F[_], A](implicit innerConverter: MonoidConverter[F, A]): MonoidConverter[Future, F[A]] = (inst: Future[F[A]]) => {
+    inst.map(innerConverter.to).monoid
+  }
 
   implicit def futureFunctorConverter: FunctorConverter[Future] = new FunctorConverter[Future]:
     override def to[A](inst: Future[A]): Functor[Future, A] = inst.functor
@@ -26,6 +32,7 @@ private trait FutureInstances(implicit executor: ExecutionContext) {
     override def apply[A](a: A): Future[A] = Future(a)
 
   implicit class FutureInstanceImpl[A](s: Future[A]) extends FutureFunctor(s) with FutureMonad(s) with FutureApplicative(s) with FutureZip(s)
+  implicit class FutureMonoidEffectTypeClass[B, F[_]](a: Future[Monoid[F, B]]) extends FutureMonoid(a)
 
   trait FutureZip[A](s: Future[A]) extends Zip[Future, A] {
     override def zipWith[B, C](o: Future[B])(zip: A => B => C): Future[C] = s.zipWith(o)(All.uncurry(zip))
@@ -45,4 +52,19 @@ private trait FutureInstances(implicit executor: ExecutionContext) {
     override def inst: Future[A] = s
   }
 
+
+  trait FutureMonoid[O[_], B](s: Future[Monoid[O, B]]) extends Monoid[Future, O[B]] {
+
+
+    override def combine(y: Future[O[B]]): Future[O[B]] = {
+      for {
+        inS <- s
+        inY <- y
+      } yield inS.combine(inY)
+    }
+
+    override def inst: Future[O[B]] = s.map(_.inst)
+  }
 }
+
+object FutureInstances extends FutureInstances

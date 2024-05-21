@@ -5,6 +5,13 @@ import effects.*
 
 private trait OptionInstances {
 
+  implicit def optionMonoidConverter[F[_], A](implicit innerConverter: MonoidConverter[F, A]): MonoidConverter[Option, F[A]] = (inst: Option[F[A]]) => {
+    inst.map(innerConverter.to).monoid
+  }
+
+  implicit def optionTraversableConverter: TraversableConverter[Option] = new TraversableConverter[Option]:
+    override def to[A](inst: Option[A]): Traversable[Option, A] = inst.traversable
+
   implicit def optionZipConverter: ZipConverter[Option] = new ZipConverter[Option]:
     override def to[A](a: Option[A]): Zip[Option, A] = a.asZip
     
@@ -26,7 +33,9 @@ private trait OptionInstances {
   implicit def pureOption: Pure[Option] = new Pure[Option]:
     override def apply[A](a: A): Option[A] = Some(a)
 
-  implicit class OptionInstanceImpl[A](s: Option[A]) extends OptionApplicative(s) with OptionMonad(s) with OptionFunctor(s) with OptionFoldable(s) with OptionZip(s)
+  implicit class OptionInstanceImpl[A](s: Option[A]) extends OptionApplicative(s) with OptionMonad(s) with OptionFunctor(s)
+    with OptionTraversable(s) with OptionFoldable(s) with OptionZip(s)
+
   implicit class OptionMonoidEffectTypeClass[B, F[_]](a: Option[Monoid[F, B]]) extends OptionMonoid(a)
 
   trait OptionMonad[A](s: Option[A]) extends Monad[Option, A] {
@@ -48,10 +57,18 @@ private trait OptionInstances {
 
 
     override def combine(y: Option[O[B]]): Option[O[B]] = {
-      for {
-        inS <- s
-        inY <- y
-      } yield inS.combine(inY)
+
+      (s, y) match
+        case (None, o) => o
+        case (x, None) => x.inst
+        case _ =>
+          for {
+            inS <- s
+            inY <- y
+          } yield inS.combine(inY)
+
+
+
     }
 
     override def inst: Option[O[B]] = s.map(_.inst)
@@ -63,7 +80,17 @@ private trait OptionInstances {
       oi <- o
     } yield zip(si)(oi)
   }
-  
+
+  trait OptionTraversable[A](s: Option[A]) extends Traversable[Option, A] {
+    override def traverse[M[_], B](f: A => M[B])(implicit c: MonadConverter[M], r: Return[M]): M[Option[B]] = {
+      s match
+        case None => r(None)
+        case Some(x) => c.to(f(x)).map(Some(_))
+
+    }
+  }
+
+
   trait OptionFoldable[A](s: Option[A]) extends Foldable[Option, A] {
     def foldLeft[B](b: B)(f: (B, A) => B): B = s.fold(b)(a => f(b, a))
 

@@ -1,14 +1,16 @@
 package effects.instance
 
-import effects.{Applicative, ApplicativeConverter, Empty, Foldable, Functor, FunctorConverter, Monad, MonadConverter, Monoid, MonoidConverter, Pure, Return, Zip, ZipConverter}
+import effects.{Applicative, ApplicativeConverter, Empty, Foldable, Functor, FunctorConverter, Monad, MonadConverter, Monoid, MonoidConverter, Pure, Return, Traversable, TraversableConverter, Zip, ZipConverter}
 
 import scala.language.implicitConversions
 
 
 private trait ListInstances {
 
-  implicit def seqMonoidConverter: MonoidConverter[Seq] = new MonoidConverter[Seq]:
-    override def to[A](inst: Seq[A]): Monoid[Seq, A] = inst.monoid
+  implicit def seqMonoidConverter[A]: MonoidConverter[Seq, A] = (inst: Seq[A]) => inst.monoid
+
+  implicit def seqTraversableConverter: TraversableConverter[Seq] = new TraversableConverter[Seq]:
+    override def to[A](inst: Seq[A]): Traversable[Seq, A] = inst.traversable
 
   implicit def seqFunctorConverter: FunctorConverter[Seq] = new FunctorConverter[Seq]:
     override def to[A](inst: Seq[A]): Functor[Seq, A] = inst.functor
@@ -30,7 +32,8 @@ private trait ListInstances {
   implicit def pureSeq: Pure[Seq] = new Pure[Seq]:
     override def apply[A](a: A): Seq[A] = Seq(a)
 
-  implicit class SeqInstanceImpl[A](s: Seq[A]) extends SeqApplicative(s) with SeqMonad(s) with SeqFunctor(s) with SeqMonoid(s) with SeqFoldable(s) with SeqZip(s)
+  implicit class SeqInstanceImpl[A](s: Seq[A]) extends SeqApplicative(s) with SeqMonad(s) with SeqFunctor(s) with SeqMonoid(s)
+    with SeqTraversable(s) with SeqFoldable(s) with SeqZip(s)
 
   trait SeqMonad[A](s: Seq[A]) extends  Monad[Seq, A]  {
     override def flatMap[B](f: A => Seq[B]): Seq[B] = s.flatMap(f)
@@ -39,6 +42,12 @@ private trait ListInstances {
   trait SeqApplicative[A](s: Seq[A]) extends Applicative[Seq, A] {
 
     override def ap[B](a: Seq[A => B]): Seq[B] = a.flatMap(f => s.map(v => f(v)))
+  }
+
+  trait SeqTraversable[A](s: Seq[A]) extends Traversable[Seq, A] {
+    override def traverse[M[_], B](f: A => M[B])(implicit c: MonadConverter[M], r: Return[M]): M[Seq[B]] = {
+      Traversable.mapM(f)(s)
+    }
   }
 
   trait SeqFoldable[A](s: Seq[A]) extends Foldable[Seq, A] {

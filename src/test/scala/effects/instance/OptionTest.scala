@@ -9,7 +9,6 @@ import scala.language.implicitConversions
 class OptionTest extends AnyFunSuite {
 
   test("fold implementation") {
-//    val res = (_: Option[Int]).fold("hello")(x => x.toString)
     assert(None.foldLeft("Hello")((b, i) => i.toString) == "Hello")
     assert(Some(200).foldLeft("Hello")((b, i) => i.toString) == "200")
   }
@@ -27,7 +26,6 @@ class OptionTest extends AnyFunSuite {
       x <- Some(1)
       y <- Some(100)
     } yield x + y
-
 
     assert(res.contains(101))
   }

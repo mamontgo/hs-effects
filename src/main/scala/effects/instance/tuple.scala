@@ -54,4 +54,17 @@ trait TupleInstances {
 
     override def foldRight[C](b: C)(f: (B, C) => C): C = foldLeft(b)(FunctionSyntax.flip(f))
   }
+
+
+  trait TupleMonoid[A, E[_], B](s: (A, Monoid[E, B])) extends Monoid[[F] =>> (A, F), E[B]] {
+
+    override def inst: (A, E[B]) = s.map(_.inst)
+
+    override def combine(y: (A, E[B])): (A, E[B]) = {
+      for {
+        f <- s
+        n <- y
+      } yield f.combine(n)
+    }
+  }
 }

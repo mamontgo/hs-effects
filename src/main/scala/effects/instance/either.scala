@@ -1,10 +1,14 @@
 package effects.instance
 
 import effects.syntax.FunctionSyntax
-import effects.{Applicative, ApplicativeConverter, Empty, Foldable, Functor, FunctorConverter, Monad, MonadConverter, Monoid, Pure, Return, Zip, ZipConverter}
+import effects.{Applicative, ApplicativeConverter, Empty, Foldable, Functor, FunctorConverter, Monad, MonadConverter, Monoid, MonoidConverter, Pure, Return, Zip, ZipConverter}
 
 
 trait EitherInstances {
+
+  implicit def eitherMonoidConverter[F[_], A, B](implicit innerConverter: MonoidConverter[F, A]): MonoidConverter[[E] =>> Either[B, E], F[A]] = (inst: Either[B, F[A]]) => {
+    inst.map(innerConverter.to).monoid
+  }
 
   implicit def eitherFunctorConverter[B]: FunctorConverter[[F] =>> Either[B, F]] = new FunctorConverter[[F] =>> Either[B, F]]:
     override def to[A](inst: Either[B, A]): Functor[[F] =>> Either[B, F], A] = inst.functor

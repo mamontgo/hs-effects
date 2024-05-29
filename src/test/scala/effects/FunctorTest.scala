@@ -10,7 +10,7 @@ class FunctorTest extends AnyFunSuite {
   test("liftF test") {
 
     val addOne:Int => Int = _+1
-    val addOneF = Functor.liftF(addOne)
+    val addOneF = liftF(addOne)
 
     IO.runEffect (println <-> addOneF (Some(43)))
     IO.runEffect (println <-> addOneF (Seq(43, 44)))

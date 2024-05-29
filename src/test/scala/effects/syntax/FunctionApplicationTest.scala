@@ -1,6 +1,7 @@
 package effects.syntax
 
-import effects.syntax.FunctionSyntax.*
+import effects.instance.IO
+import effects.All._
 import org.scalatest.funsuite.AnyFunSuite
 
 class FunctionApplicationTest extends AnyFunSuite {
@@ -31,5 +32,13 @@ class FunctionApplicationTest extends AnyFunSuite {
 
 
   }
+
+//  test("take repeat items") {
+//    IO.runEffect(
+//      println(
+//        take(10, repeat("hello"))
+//      )
+//    )
+//  }
 
 }

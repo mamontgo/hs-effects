@@ -1,14 +1,17 @@
 package effects.instance
 
 import effects.syntax.FunctionSyntax
-import effects.{Applicative, ApplicativeConverter, Empty, Foldable, Functor, FunctorConverter, Monad, MonadConverter, Monoid, MonoidConverter, Pure, Return, Zip, ZipConverter}
+import effects.{Applicative, ApplicativeConverter, Empty, Foldable, Functor, FunctorConverter, Monad, MonadConverter, Monoid, MonoidConverter, Pure, Return, Traversable, TraversableConverter, Zip, ZipConverter}
 
 
 trait EitherInstances {
 
   implicit def eitherMonoidConverter[F[_], A, B](implicit innerConverter: MonoidConverter[F, A]): MonoidConverter[[E] =>> Either[B, E], F[A]] = (inst: Either[B, F[A]]) => {
-    inst.map(innerConverter.to).monoid
+    EitherMonoidEffectTypeClass(inst)
   }
+
+  implicit def eitherTraversableConverter[B]: TraversableConverter[[F] =>> Either[B, F]] = new TraversableConverter[[F] =>> Either[B, F]]:
+    override def to[A](inst: Either[B, A]): Traversable[[F] =>> Either[B, F], A] = inst.traversable
 
   implicit def eitherFunctorConverter[B]: FunctorConverter[[F] =>> Either[B, F]] = new FunctorConverter[[F] =>> Either[B, F]]:
     override def to[A](inst: Either[B, A]): Functor[[F] =>> Either[B, F], A] = inst.functor
@@ -18,7 +21,6 @@ trait EitherInstances {
 
   implicit def eitherApplicativeConverter[B]: ApplicativeConverter[[F] =>> Either[B, F]] = new ApplicativeConverter[[F] =>> Either[B, F]]:
     override def to[A](inst: Either[B, A]): Applicative[[F] =>> Either[B, F], A] = inst.applicative
-
   
   implicit def eitherZipConverter[B]: ZipConverter[[F] =>> Either[B, F]] = new ZipConverter[[F] =>> Either[B, F]]:
     override def to[A](a: Either[B, A]): Zip[[F] =>> Either[B, F], A] = a.inst
@@ -32,17 +34,19 @@ trait EitherInstances {
     override def apply[A](a: A): Either[?, A] = Right(a)
 
   implicit class EitherInstanceImpl[A, B](s: Either[A, B]) extends EitherApplicative(s) with EitherMonad(s) with EitherFunctor(s) with EitherZip(s)
-  implicit class EitherMonoidEffectTypeClass[A, E[_], B](s: Either[A, Monoid[E, B]]) extends EitherMonoid(s)
+      with EitherTraversable(s) with EitherFoldable(s)
 
-  trait EitherMonoid[A, E[_], B] (s: Either[A, Monoid[E, B]]) extends Monoid[[F] =>> Either[A, F], E[B]] {
+  implicit class EitherMonoidEffectTypeClass[A, E[_], B](s: Either[A, E[B]])(implicit c: MonoidConverter[E, B]) extends EitherMonoid(s)(c)
 
-    override def inst: Either[A, E[B]] = s.map(_.inst)
+  trait EitherMonoid[A, E[_], B] (s: Either[A, E[B]])(implicit c: MonoidConverter[E, B]) extends Monoid[[F] =>> Either[A, F], E[B]] {
+
+    override def inst: Either[A, E[B]] = s
 
     override def combine(y: Either[A, E[B]]): Either[A, E[B]] = {
       for {
         f <- s
         n <- y
-      } yield f.combine(n)
+      } yield c.to(f).combine(n)
     }
   }
 
@@ -67,6 +71,16 @@ trait EitherInstances {
       oi <- o
     } yield zip(si)(oi)
   }
+
+  trait EitherTraversable[A, B](s: Either[A, B]) extends Traversable[[F] =>> Either[A, F], B] {
+    override def traverse[M[_], C](f: B => M[C])(implicit c: MonadConverter[M], r: Return[M]): M[Either[A, C]] = {
+      s match
+        case Left(a) => r(Left(a))
+        case Right(x) => c.to(f(x)).map(Right(_))
+
+    }
+  }
+
 
   trait EitherFoldable[A, B](s: Either[A, B]) extends Foldable[[F] =>> Either[A, F], B] {
 

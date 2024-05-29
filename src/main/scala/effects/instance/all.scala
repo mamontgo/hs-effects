@@ -11,6 +11,9 @@ trait All extends ListInstances
   with EitherInstances
   with TryInstances
   with WriterInstances
+  with TupleInstances
+  with ConstInstances
+  with IdentityInstances
 
 
 object All

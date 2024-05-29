@@ -6,8 +6,11 @@ import effects.*
 private trait OptionInstances {
 
   implicit def optionMonoidConverter[F[_], A](implicit innerConverter: MonoidConverter[F, A]): MonoidConverter[Option, F[A]] = (inst: Option[F[A]]) => {
-    inst.map(innerConverter.to).monoid
+    OptionMonoidEffectTypeClass(inst).monoid
   }
+
+  implicit def optionAlternativeConverter: AlternativeConverter[Option] = new AlternativeConverter[Option]:
+    override def to[A](inst: Option[A]): Alternative[Option, A] = inst.alternative
 
   implicit def optionTraversableConverter: TraversableConverter[Option] = new TraversableConverter[Option]:
     override def to[A](inst: Option[A]): Traversable[Option, A] = inst.traversable
@@ -34,9 +37,9 @@ private trait OptionInstances {
     override def apply[A](a: A): Option[A] = Some(a)
 
   implicit class OptionInstanceImpl[A](s: Option[A]) extends OptionApplicative(s) with OptionMonad(s) with OptionFunctor(s)
-    with OptionTraversable(s) with OptionFoldable(s) with OptionZip(s)
+    with OptionTraversable(s) with OptionFoldable(s) with OptionZip(s) with OptionAlternative(s)
 
-  implicit class OptionMonoidEffectTypeClass[B, F[_]](a: Option[Monoid[F, B]]) extends OptionMonoid(a)
+  implicit class OptionMonoidEffectTypeClass[B, F[_]](a: Option[F[B]])(implicit c:MonoidConverter[F, B]) extends OptionMonoid(a)(c)
 
   trait OptionMonad[A](s: Option[A]) extends Monad[Option, A] {
     override def flatMap[B](f: A => Option[B]): Option[B] = s.flatMap(f)
@@ -53,7 +56,7 @@ private trait OptionInstances {
     override def inst: Option[A] = s
   }
 
-  trait OptionMonoid[O[_], B](s: Option[Monoid[O, B]]) extends Monoid[Option, O[B]] {
+  trait OptionMonoid[O[_], B](s: Option[O[B]])(implicit c:MonoidConverter[O, B]) extends Monoid[Option, O[B]] {
 
 
     override def combine(y: Option[O[B]]): Option[O[B]] = {
@@ -65,13 +68,13 @@ private trait OptionInstances {
           for {
             inS <- s
             inY <- y
-          } yield inS.combine(inY)
+          } yield c.to(inS).combine(inY)
 
 
 
     }
 
-    override def inst: Option[O[B]] = s.map(_.inst)
+    override def inst: Option[O[B]] = s
   }
 
   trait OptionZip[A](s: Option[A]) extends Zip[Option, A] {
@@ -95,6 +98,17 @@ private trait OptionInstances {
     def foldLeft[B](b: B)(f: (B, A) => B): B = s.fold(b)(a => f(b, a))
 
     def foldRight[B](b: B)(f: (A, B) => B): B = foldLeft(b)(FunctionSyntax.flip(f))
+  }
+
+  trait OptionAlternative[A](s: Option[A]) extends Alternative[Option, A] {
+
+    override def empty: Option[A] = None
+
+    override def alt: Option[A] => Option[A] = a =>  {
+      (s, a) match
+        case (x@Some(_), _) => x
+        case (_, x) => x
+    }
   }
 }
 

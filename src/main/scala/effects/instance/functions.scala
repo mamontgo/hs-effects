@@ -6,7 +6,7 @@ import effects.{Applicative, ApplicativeConverter, Functor, FunctorConverter, Mo
 private trait FunctionInstances {
 
   implicit def producerMonoidConverter[F[_], A](implicit innerConverter: MonoidConverter[F, A]): MonoidConverter[[E] =>> () => E, F[A]] = (inst: () => F[A]) => {
-    inst.map(innerConverter.to).monoid
+    ProducerMonoidEffectTypeClass(inst)
   }
 
   implicit def producerFunctionFunctorConverter: FunctorConverter[[F] =>> () => F] = new FunctorConverter[[F] =>> () => F]:
@@ -19,7 +19,7 @@ private trait FunctionInstances {
     override def to[A](inst: () => A): Applicative[[F] =>> () => F, A] = inst.applicative
 
   implicit def functionMonoidConverter[F[_], A, B](implicit innerConverter: MonoidConverter[F, A]): MonoidConverter[[E] =>> B => E, F[A]] = (inst: B => F[A]) => {
-    inst.map(innerConverter.to).monoid
+    FunctionMonoidEffectTypeClass(inst)
   }
 
   implicit def functionFunctorConverter[B]: FunctorConverter[[F] =>> B => F] = new FunctorConverter[[F] =>> B => F]:
@@ -32,10 +32,10 @@ private trait FunctionInstances {
     override def to[A](inst: B => A): Applicative[[F] =>> B => F, A] = inst.applicative
 
   implicit class FunctionInstanceImpl[A, B](s: A => B) extends FunctionFunctor(s) with FunctionApplicative(s) with FunctionMonad(s) with FunctionZip(s)
-  implicit class FunctionMonoidEffectTypeClass[A, E[_], B](s: A => Monoid[E, B]) extends FunctionMonoid(s)
+  implicit class FunctionMonoidEffectTypeClass[A, E[_], B](s: A => E[B])(implicit c:MonoidConverter[E, B]) extends FunctionMonoid(s)(c)
 
   implicit class ProducerInstanceImpl[A](s: () => A) extends ProducerFunctor(s) with ProducerApplicative(s) with ProducerMonad(s) with ProducerZip(s)
-  implicit class ProducerMonoidEffectTypeClass[E[_], B](s: () => Monoid[E, B]) extends ProducerMonoid(s)
+  implicit class ProducerMonoidEffectTypeClass[E[_], B](s: () => E[B])(implicit c:MonoidConverter[E, B]) extends ProducerMonoid(s)(c)
 
   implicit def functionZipConverter[B]: ZipConverter[[F] =>> B => F] = new ZipConverter[[F] =>> B => F]:
     override def to[A](a: B => A): Zip[[F] =>> B => F, A] = a.asZip
@@ -63,15 +63,15 @@ private trait FunctionInstances {
 
   }
 
-  trait FunctionMonoid[A, E[_], B](s: A => Monoid[E, B]) extends Monoid[[F] =>> A => F, E[B]] {
+  trait FunctionMonoid[A, E[_], B](s: A => E[B])(implicit c: MonoidConverter[E, B]) extends Monoid[[F] =>> A => F, E[B]] {
 
-    override def inst: A => E[B] = s.map(_.inst)
+    override def inst: A => E[B] = s
 
     override def combine(y: A => E[B]): A => E[B] = {
       for {
         f <- s
         n <- y
-      } yield f.combine(n)
+      } yield c.to(f).combine(n)
     }
   }
 
@@ -105,15 +105,15 @@ private trait FunctionInstances {
     override def inst: () => B = s
   }
 
-  trait ProducerMonoid[E[_], B](s: () => Monoid[E, B]) extends Monoid[[F] =>> () => F, E[B]] {
+  trait ProducerMonoid[E[_], B](s: () => E[B])(implicit c:MonoidConverter[E, B]) extends Monoid[[F] =>> () => F, E[B]] {
 
-    override def inst: () => E[B] = s.map(_.inst)
+    override def inst: () => E[B] = s
 
     override def combine(y: () => E[B]): () => E[B] = {
       for {
         f <- s
         n <- y
-      } yield f.combine(n)
+      } yield c.to(f).combine(n)
     }
   }
 }

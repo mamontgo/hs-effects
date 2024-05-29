@@ -5,7 +5,7 @@ import effects.instance.IO
 import org.scalatest.funsuite.AnyFunSuite
 
 import scala.io.BufferedSource
-import scala.util.{Try, Using}
+import scala.util.{Random, Try, Using}
 
 class Sandbox  extends AnyFunSuite {
 
@@ -19,7 +19,11 @@ class Sandbox  extends AnyFunSuite {
   }
 
   test("fold either") {
-    
+
+    val r = Random()
+    val range: Range = 1 to 10
+
+
     val x = Try {
       "hello"
     }

@@ -5,7 +5,7 @@ import effects.All._
 
 class WriterTest extends AnyFunSuite{
 
-  test("simple log") {
+  test("run writer monad") {
     def logNumber(x: Int) = Writer((x, Seq(s"You got $x")))
 
     val x = for {
@@ -17,8 +17,15 @@ class WriterTest extends AnyFunSuite{
     assert(x.runWriter._1 == 15)
     assert(x.runWriter._2 == Seq("You got 3", "You got 5", "Multiply numbers"))
 
-    IO.runEffect(println(x.runWriter))
-
   }
+
+  test("run writer applicative") {
+    def logNumber(x: Int) = Writer((x, Seq(s"You got $x")))
+    val addTwo = Writer(((_:Int)+2, Seq("Add two")))
+    val res = logNumber(34) <*> addTwo
+    assert(res.runWriter._1 == 36)
+    assert(res.runWriter._2 == Seq("You got 34", "Add two"))
+  }
+
 
 }

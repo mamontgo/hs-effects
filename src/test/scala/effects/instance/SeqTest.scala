@@ -1,8 +1,7 @@
 package effects.instance
 
 import effects.All.*
-import effects.Functor._
-import effects.{Functor, FunctorMap}
+import effects.FunctorMap
 import org.scalatest.funsuite.AnyFunSuite
 
 class SeqTest extends AnyFunSuite {

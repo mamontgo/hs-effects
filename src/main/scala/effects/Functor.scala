@@ -18,11 +18,12 @@ trait Functor[F[_], A] extends Effect[F, A] {
   
 }
 
-object Functor {
-
+trait FunctorFunctions {
   // (A => B) => F[A] => F[B]
   def liftF[A, B](f: A => B): FunctorMap[A, B] = FunctorMap(f)
 }
+
+object Functor extends FunctorFunctions
 
 case class FunctorMap[A,B](f:A => B) {
   def apply[F[_]](x: Functor[F, A]): F[B] = {

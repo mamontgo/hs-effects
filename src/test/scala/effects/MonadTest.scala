@@ -25,7 +25,7 @@ class MonadTest extends AnyFunSuite {
   test("monad sequence") {
 
     val list: Seq[Option[String]] = Seq(Some("123"), Some("321"))
-    val res: Option[Seq[String]] = Monad.sequence(list)
+    val res: Option[Seq[String]] = sequence(list)
 
     IO.runEffect(println(res))
     assert(res.contains(List("123", "321")))
@@ -46,7 +46,7 @@ class MonadTest extends AnyFunSuite {
 
     val nums: Seq[Int] = 1 to 10
 
-    val res = Monad.mapM(asOption)(nums)
+    val res = mapM(asOption)(nums)
 
     IO.runEffect(println(res))
     assert(res.contains(List(1, 2, 3, 4, 50, 6, 7, 8, 9, 10)))

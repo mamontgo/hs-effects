@@ -7,7 +7,7 @@ import scala.util.{Success, Try}
 trait TryInstances {
 
   implicit def tryMonoidConverter[F[_], A](implicit innerConverter: MonoidConverter[F, A]): MonoidConverter[Try, F[A]] = (inst: Try[F[A]]) => {
-    inst.map(innerConverter.to).monoid
+    TryMonoidEffectTypeClass(inst)
   }
 
   implicit def tryFunctorConverter: FunctorConverter[Try] = new FunctorConverter[Try]:
@@ -30,7 +30,7 @@ trait TryInstances {
 
   implicit class TryEffectTypeClass[A](a: Try[A]) extends TryMonad(a) with TryApplicative(a) with TryFunctor(a) with TryIO(a)
 
-  implicit class TryMonoidEffectTypeClass[B, F[_]](a: Try[Monoid[F, B]]) extends TryMonoid(a)
+  implicit class TryMonoidEffectTypeClass[B, F[_]](a: Try[F[B]])(implicit c:MonoidConverter[F, B])  extends TryMonoid(a)(c)
 
   trait TryIO[A](s: Try[A]) {
     def asIO:IO[A] = IO.create(s.get)
@@ -50,16 +50,16 @@ trait TryInstances {
     override def inst: Try[A] = s
   }
 
-  trait TryMonoid[B, F[_]](s: Try[Monoid[F, B]]) extends Monoid[Try, F[B]] {
+  trait TryMonoid[B, F[_]](s: Try[F[B]])(implicit c:MonoidConverter[F, B]) extends Monoid[Try, F[B]] {
 
     override def combine(y: Try[F[B]]): Try[F[B]] = s match
       case Success(i) => y match
-        case Success(x) => Success(i.combine(x))
+        case Success(x) => Success(c.to(i).combine(x))
         case z => z
-      case n => n.map(_.inst)
+      case n => n
 
     override def inst: Try[F[B]] = {
-      s.map(_.inst)
+      s
     }
 
   }

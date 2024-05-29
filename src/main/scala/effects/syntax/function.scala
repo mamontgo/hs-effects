@@ -1,6 +1,6 @@
 package effects.syntax
 
-import scala.annotation.targetName
+import scala.annotation.{tailrec, targetName}
 
 
 trait FunctionSyntax {
@@ -27,6 +27,13 @@ trait FunctionSyntax {
   def fst[A, B]: (A, B) => A = (a: A, b: B) => a
 
   def snd[A, B]: (A, B) => B = (a: A, b: B) => b
+
+  def take[A](c: Int, i:Seq[A]) = i.take(c)
+  
+  final def repeat[A](a:A):Seq[A] = repeatItems(Seq(), a)
+
+  @tailrec
+  private final def repeatItems[A](s:Seq[A], a:A): Seq[A] = repeatItems(s.appended(a), a)
 }
 
 object FunctionSyntax extends FunctionSyntax

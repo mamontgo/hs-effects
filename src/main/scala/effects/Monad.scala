@@ -25,29 +25,29 @@ trait Monad[F[_], A] extends Functor[F, A] {
 }
 
 
-object Monad {
-
+trait MonadFunctions {
   // M[M[A]] => M[A]
-  def join[F[_], B](a:F[F[B]])(implicit c: MonadConverter[F]): F[B] = {
+  def join[F[_], B](a: F[F[B]])(implicit c: MonadConverter[F]): F[B] = {
     c.to(a).flatMap(identity)
   }
 
-  
+
   // Seq[F[A]] => F[Seq[A]]
-  def sequence[M[_], A](s: Seq[M[A]])(implicit c: MonadConverter[M], r: Return[M]):M[Seq[A]] = {
+  def sequence[M[_], A](s: Seq[M[A]])(implicit c: MonadConverter[M], r: Return[M]): M[Seq[A]] = {
     mapM(identity[M[A]])(s)(c, r)
   }
 
-  def mapM[M[_], A, B](f:A => M[B])(l:Seq[A])(implicit c: MonadConverter[M], r: Return[M]): M[Seq[B]] = {
-    val foldFunction: (A, Monad[M, Seq[B]]) => Monad[M, Seq[B]] = (a:A, r:  Monad[M, Seq[B]]) => {
-       val res = for {
+  def mapM[M[_], A, B](f: A => M[B])(l: Seq[A])(implicit c: MonadConverter[M], r: Return[M]): M[Seq[B]] = {
+    val foldFunction: (A, Monad[M, Seq[B]]) => Monad[M, Seq[B]] = (a: A, r: Monad[M, Seq[B]]) => {
+      val res = for {
         x <- c.to(f(a))
         xs <- r
       } yield Seq(x) ++ xs
-        c.to(res)
+      c.to(res)
     }
 
     l.foldRight(c.to(r(Seq[B]())))(foldFunction).inst
   }
-
 }
+
+object Monad extends MonadFunctions

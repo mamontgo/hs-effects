@@ -1,5 +1,4 @@
 import effects.All.*
-import effects.Functor.*
 import effects.instance.IO
 
 
@@ -22,15 +21,20 @@ def sayGoodbye(): Unit = {
 }
 
 def addNumbers(): Unit = {
+
   val addNumbers: Int => Int => Int = curry((_:Int) + (_:Int))
+
   val first:IO[Int] = println("Enter first number") >> readline() <\> (_.toInt)
+
   val second:IO[Int] = println("Enter second number") >> readline() <\> (_.toInt)
 
-  val add:IO[Unit] = first.zipWith(second)(addNumbers) <\> ("Result is: " ++ (_:Int).toString) >>= (println(_))
+  val add:IO[Unit] = first.zipWith(second)(addNumbers) <\> ("Result is: " ++ (_:Int).toString) >>= println
 
   IO.runEffect(add)
 
-
+//  IO.tryRun(add) match
+//    case Left(x) => IO.runEffect(println("Are you sure you know what a number is?") >> println(x.getMessage))
+//    case Right(x) =>
 }
 
 

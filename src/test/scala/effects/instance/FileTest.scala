@@ -1,6 +1,7 @@
 package effects.instance
 
 import effects.All.*
+import effects.Monad
 import org.scalatest.funsuite.AnyFunSuite
 
 import scala.runtime.Nothing$
@@ -10,43 +11,23 @@ class FileTest extends AnyFunSuite {
   val fileName = "src/test/resources/test.txt"
 
   test("read file") {
-    val x: IO[Seq[String]] = FileRead.read(fileName).map(_.getLines)
-    val printLines = x.flatMap(s => {
-      IO.create {
-        s.map(line => {
-          println(line)
-        })
-      }
+    val fileLinesIO: IO[Seq[String]] = FileRead.read(fileName).map(_.getLines)
+
+
+    val printLines:IO[Seq[IO[Unit]]] = fileLinesIO.map(_.map(println))
+
+    IO.runEffect({
+      val sequenced: IO[IO[Seq[Unit]]] = printLines.map(effects.Traversable.sequenceA)
+      val joined: IO[Seq[Unit]] = Monad.join(sequenced)
+      joined
     })
+
+//    Monad.join(fileLinesIO.map(x => effects.Traversable.sequenceA(x.map(println))))
 
     IO.runEffect(printLines).foreach(IO.runEffect)
   }
 
 
-  test("file testing") {
-    Using(scala.io.Source.fromFile(fileName)) {
-      result => {
-        result.getLines().foreach(x => println(x))
-        result
-      }
-    }
-  }
 
-  test("file testing2") {
-    val x = Using(scala.io.Source.fromFile(fileName)) {
-      result => {
-        result
-      }
-    }
 
-    x.map(s => {
-      Using(s) {
-        result => {
-          result.getLines().foreach(x => println(x))
-        }
-      }
-    })
-
-    x.map(s => s.getLines().foreach(x => println(x)))
-  }
 }
